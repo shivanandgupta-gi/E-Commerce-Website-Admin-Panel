@@ -7,9 +7,17 @@ body{font-family: "Raleway",serif; background: #f1f1f1;}
 .btn-blue{background: #3872fa !important;color: #fff !important; padding: 8px 20px !important;}
 .btn-blue:hover{background: #3067e5 !important;}
 .btn-sm{padding: 6px 20px !important; font-size: 13px !important;}
+.btn-sm{padding: 8px 20px !important; font-size: 16px !important;}
 .btn-svg{font-size: 22px !important;}
 
 ::-webkit-scrollbar { width: 10px !important; height: 10px !important; }
 ::-webkit-scrollbar-thumb { background: #ccc !important; }
 
 th.MuiTableCell-root{@apply bg-[#f1f1f1] py-1}
+
+a.active button{background: #dcdcdc !important;}
+
+.MuiButton-icon svg{font-size: 27px !important
+  ;}
+
+.css-rizt0-MuiTypography-root{font-size: 14px !important;}

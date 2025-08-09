@@ -72,9 +72,13 @@ const Header = () => {
           <IoIosSettings className="text-[18px]" />
         </Button>
         {/* my account  */}
+        {
+          context.isLogin===true ?
+            <div className="relative">
         <div className="rounded-full w-[35px] h-[35px] overflow-hidden cursor-pointer" onClick={handleClickMyAcc}>
             <img src="https://th.bing.com/th/id/OIP.bJpr9jpclIkXQT-hkkb1KQHaHa?w=250&h=250&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2" className="w-full h-full object-cover"/>
         </div>
+        
           <Menu
         anchorEl={anchorMyAcc}
         id="account-menu"
@@ -152,6 +156,11 @@ const Header = () => {
         </MenuItem>
        
       </Menu>
+      </div>
+      :
+      <Button className="btn-blue btn-sm !rounded-full">Sign In</Button>
+        }
+       
       </div>
        </div>
 

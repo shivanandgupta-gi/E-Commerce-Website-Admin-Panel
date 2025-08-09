@@ -3,11 +3,14 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Header from "./Componenets/Header";
 import Sidebar from "./Componenets/Sidebar";
 import Dashboard from "./Pages/Dashboard";
+import Login from "./Pages/Login";
+import SignUp from "./Pages/Signup";
 
 const MyContext = createContext();
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLogin, setIsLogin]=useState(false);
 
   const router = createBrowserRouter([
     {
@@ -26,9 +29,24 @@ function App() {
         </section>
       ),
     },
+    {
+      path: "/login",
+      element: (
+       <Login/>
+      ),
+    },
+    {
+      path: "/signup",
+      element: (
+       <SignUp/>
+      ),
+    },
   ]);
 
-  const values = { isSidebarOpen, setIsSidebarOpen };
+  const values = { isSidebarOpen, setIsSidebarOpen,
+    isLogin, setIsLogin
+
+   };
 
   return (
     <MyContext.Provider value={values}>

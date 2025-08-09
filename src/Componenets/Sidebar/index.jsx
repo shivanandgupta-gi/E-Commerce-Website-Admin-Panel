@@ -38,7 +38,7 @@ const context=useContext(MyContext);
         {/* for logo */}
         <div className="py-2 w-full">
           <Link to="/">
-            <img src="https://ecme-react.themenate.net/img/logo/logo-light-full.png" className="w-[120px]" />
+            <img src="https://isomorphic-furyroad.vercel.app/_next/static/media/logo.a795e14a.svg" className="w-[200px]" />
           </Link>
         </div>
         {/* for dashbord button */}
