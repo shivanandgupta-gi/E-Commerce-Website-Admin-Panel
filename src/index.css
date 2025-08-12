@@ -7,6 +7,7 @@ body{font-family: "Raleway",serif; background: #f1f1f1;}
 .btn-blue{background: #3872fa !important;color: #fff !important; padding: 8px 20px !important;}
 .btn-blue:hover{background: #3067e5 !important;}
 .btn-sm{padding: 6px 20px !important; font-size: 13px !important;}
+.btn-sms{padding: 5px 17px !important; font-size: 12px !important;}
 .btn-sm{padding: 8px 20px !important; font-size: 16px !important;}
 .btn-svg{font-size: 22px !important;}
 
@@ -21,3 +22,32 @@ a.active button{background: #dcdcdc !important;}
   ;}
 
 .css-rizt0-MuiTypography-root{font-size: 14px !important;}
+.MuiAppBar-colorPrimary{background: #f6f2f2 !important;}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+.MuiSelect-select{background: #fff !important;}
+
+.MuiDialog-paper{background: #f9fafb !important;}
+/* Style for OTP input boxes */
+.otpBox input { 
+  border: 1px solid rgba(0, 0, 0, 0.3) !important; /* Light border */
+  outline: none !important;                       /* Remove default outline */
+  border-radius: 4px;                             /* Slightly rounded corners */
+}
+
+/* Style when OTP input is focused */
+.otpBox input:focus { 
+  border: 1px solid rgba(0, 0, 0, 0.7) !important; /* Darker border on focus */
+}
+
+/* Layout for OTP page container */
+.otpPage .container { 
+  height: 90vh;                                   /* Occupy 90% of viewport height */
+  display: flex;                                  /* Use flexbox for layout */
+}

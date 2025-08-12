@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -8,6 +8,7 @@ import { IoStatsChart } from "react-icons/io5";
 import { AiOutlinePieChart } from "react-icons/ai";
 import { CiBank } from "react-icons/ci";
 import { RiProductHuntLine } from "react-icons/ri";
+import { MyContext } from '../../App';
 //thsi page is for the dashboard graph making page small boxes like slae, profit, etc 
 
 const DashboardBoxes=()=> {

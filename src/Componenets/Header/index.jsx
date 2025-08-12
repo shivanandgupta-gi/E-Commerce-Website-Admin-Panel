@@ -15,6 +15,7 @@ import { IoMdLogOut } from "react-icons/io";
 import { IoSettingsOutline } from "react-icons/io5";
 import { BsGraphDown } from "react-icons/bs";
 import { MyContext } from "../../App";
+import { Link } from "react-router-dom";
 
 
 
@@ -158,7 +159,9 @@ const Header = () => {
       </Menu>
       </div>
       :
+      <Link to="/login">
       <Button className="btn-blue btn-sm !rounded-full">Sign In</Button>
+      </Link>
         }
        
       </div>

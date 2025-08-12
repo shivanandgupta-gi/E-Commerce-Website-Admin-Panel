@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 //thsi page for the side bar in admin panel
-import Link from '@mui/material/Link';
+import { Link } from 'react-router-dom'
 import { RxDashboard } from "react-icons/rx";
 import Button from '@mui/material/Button';
 import { FaRegImage } from "react-icons/fa";
@@ -61,15 +61,17 @@ const context=useContext(MyContext);
             <Collapse isOpened={subMenuIdx.includes(1) ? true : false}>
               <ul className="w-full">
                 <li className="w-full">
+                  <Link to="/homeslider">
                   <Button className="!w-full flex items-center gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9">
                     {/* Dot */}
                     <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)]"></span>
                     Home Banner List
                   </Button>
+                  </Link>
 
                 </li>
                  <li className="w-full">
-                  <Button className="!w-full gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9">
+                  <Button className="!w-full gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9" onClick={()=>{context.setisOpenFullScreenPanel({open:"true",model:"Add Home Slide"})}}>
                                         {/* Dot */}
                     <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)]"></span>
                     Add Home Banner Slide
@@ -108,13 +110,12 @@ const context=useContext(MyContext);
 
                 </li>
                  <li className="w-full">
-                  <Link to="/product/upload">
-                  <Button className="!w-full gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9">
+
+                  <Button className="!w-full gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9"  onClick={()=>{context.setisOpenFullScreenPanel({open:"true",model:"Add Product"})}}>
                                         {/* Dot */}
                     <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)]"></span>
                     Product Upload
                   </Button>
-                  </Link>
                 </li>
                  <li className="w-full">
                   <Button className="!w-full gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9">
@@ -151,7 +152,7 @@ const context=useContext(MyContext);
             <Collapse isOpened={subMenuIdx.includes(3) ? true : false}>
               <ul className="w-full">
                 <li className="w-full">
-                  <Link to="/categories">
+                  <Link to="/category">
                   <Button className="!w-full flex items-center gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9">
                     {/* Dot */}
                     <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)]"></span>
@@ -161,16 +162,14 @@ const context=useContext(MyContext);
 
                 </li>
                  <li className="w-full">
-                  <Link to="/categories/add">
-                  <Button className="!w-full gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9">
+                  <Button className="!w-full gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9" onClick={()=>{context.setisOpenFullScreenPanel({open:"true",model:"Add Category"})}}>
                                         {/* Dot */}
                     <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)]"></span>
                     Add a Category
                   </Button>
-                  </Link>
                 </li>
                 <li className="w-full">
-                <Link to="/categories/subCat">
+                <Link to="/subcategory">
                   <Button className="!w-full gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9">
                                         {/* Dot */}
                     <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)]"></span>
@@ -180,13 +179,12 @@ const context=useContext(MyContext);
                 </li>
                 <li className="w-full">
                   
-                <Link to="/categories/subCatAdd">
-                  <Button className="!w-full gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9">
+                
+                  <Button className="!w-full gap-2 !text-[rgba(0,0,0,0.7)] !capitalize !justify-start !text-[13px] !font-[500] !pl-9" onClick={()=>{context.setisOpenFullScreenPanel({open:"true",model:"Add New Sub Cat"})}}>
                                         {/* Dot */}
                     <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.2)]"></span>
                     Add a Sub Category
                   </Button>
-                  </Link>
                 </li>
               </ul>
             </Collapse>

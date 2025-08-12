@@ -138,10 +138,10 @@ const SignUp=()=> {
                                         label="Remember Me"
                                     />
                                     <Link
-                                        to="/forgot-password"
+                                        to="/login"
                                         className="text-[#3872fa]  font-[700] text-[15px] hover:underline hover:text-gray-700"
                                     >
-                                        Forgot Password?
+                                        LogIn
                                     </Link>
 
                                 </div>

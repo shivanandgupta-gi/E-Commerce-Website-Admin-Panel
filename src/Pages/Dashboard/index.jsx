@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import DashboardBoxes from '../../Componenets/DashboardBoxes';
 import { IoMdAdd } from "react-icons/io";
 import Button from '@mui/material/Button';
@@ -26,6 +26,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid,Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { MyContext } from '../../App';
 
 //this page for dashborad making
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
@@ -64,6 +65,9 @@ const columns = [
 
 
 const Dashboard=()=> {
+  
+  const context =useContext(MyContext);
+
    const [isOpenOrderProduct, setisOpenOrderProduct]=useState(null);
       const isShowOrderProduct=(idx)=>{
           if(isOpenOrderProduct===idx){
@@ -78,7 +82,7 @@ const Dashboard=()=> {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
-
+  
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(+event.target.value);
     setPage(0);
@@ -177,7 +181,7 @@ const [chart1Data, setChart1Data] = useState(
           <h1 className="text-[35px] font-bold leading-10 mb-3">Good Morning,<br/> Shivanand </h1>
           <p>Here's what happening on your store today. See the statistics at once.</p>
           <br/>
-          <Button className="btn-blue !capitalize" ><IoMdAdd/> Add Product</Button>
+          <Button className="btn-blue !capitalize" onClick={()=>{context.setisOpenFullScreenPanel({open:"true",model:"Add Product"})}}><IoMdAdd/> Add Product</Button>
         </div>
       <img src="https://ecommerce-admin-view.netlify.app/shop-illustration.webp" className="w-[250px]"/>
       </div>
@@ -425,7 +429,7 @@ const [chart1Data, setChart1Data] = useState(
             </div>
             <div className="col w-[25%] ml-auto flex items-center gap-3">
                 <Button className='btn-blue btn-sm !bg-green-500'>Export</Button>
-                <Button className='btn-blue btn-sm '>Add Product</Button>
+                <Button className='btn-blue btn-sm ' onClick={()=>{context.setisOpenFullScreenPanel({open:"true",model:"Add Product"})}}>Add Product</Button>
             </div>
             </div>
             {/* table added */}
