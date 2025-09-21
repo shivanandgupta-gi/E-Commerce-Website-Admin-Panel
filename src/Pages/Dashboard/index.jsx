@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import DashboardBoxes from '../../Componenets/DashboardBoxes';
 import { IoMdAdd } from "react-icons/io";
 import Button from '@mui/material/Button';
@@ -20,17 +20,22 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-
+import SearchBox from '../../Componenets/SearchBox';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid,Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { MyContext } from '../../App';
+import { getData } from '../../../utils/api';
+import CircularProgress from '@mui/material/CircularProgress';
+import Rating from '@mui/material/Rating';
+
+
 
 //this page for dashborad making
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
-//material ui table material
+//material ui colums
 const columns = [
   { id: 'product', label: 'PRODUCT', minWidth: 150 },
   { id: 'category', label: 'CATEGORY', minWidth: 100 },
@@ -49,6 +54,11 @@ const columns = [
     label: 'SALES',
     minWidth: 100,
   },
+    {
+    id: 'rating',
+    label: 'RATING',
+    minWidth: 100,
+  },
   {
     id: 'stock',
     label: 'STOCK',
@@ -60,9 +70,6 @@ const columns = [
     minWidth: 100,
   },
 ];
-
-
-
 
 const Dashboard=()=> {
   
@@ -173,7 +180,93 @@ const [chart1Data, setChart1Data] = useState(
   },
 ]
 );
-  
+  //backend fo table of reacent product
+  const [productCategory, setproductCategory] = useState('');
+  const [productSubCategory, setproductSubCategory] = useState('');
+   const [productThirdLevelSubCategory, setproductThirdLevelSubCategory] = useState('');
+     const [productData, setProductData] = useState([]); //to store all product data
+     const [isLoading,setIsLoading]=useState(false);
+    //filter for product category
+      //for category
+    const handleChangeProductCat = (event) => {
+      const selectedId = event.target.value;
+      setproductSubCategory("");
+      setproductThirdLevelSubCategory("") //due to at category choose all this blanck
+      setIsLoading(true); //add same is subcategory and third level subcategory
+      setproductCategory(selectedId);
+      //get all product by thir category id such that we can fielter
+      getData(`/api/product/getAllProductByCategory/${selectedId}`).then((res)=>{
+        if(res?.error === false){
+          setTimeout(() => {
+            setIsLoading(false)
+             setProductData(res?.products); //filter done
+          }, 700);
+         
+        }
+      })
+    };
+      //for subcategory
+      const handleChangeProductSubCat = (event) => {
+        const selectedId = event.target.value;
+        setproductSubCategory(selectedId);
+        //get all product by their sub category id such  we can filter a/c to sub category
+        getData(`/api/product/getAllProductBySubCategoryId/${selectedId}`).then((res)=>{
+          console.log(res);
+        })
+      };
+      //for third level sub category
+         const handleChangeProductThirdLevelSubCat = (event) => {
+          setproductThirdLevelSubCategory(event.target.value);
+           getData(`/api/product/getAllProductByThirdSubCategoryId/${event.target.value}`).then((res)=>{
+            if(res?.error === false){
+              setProductData(res?.products); //filter done
+            }
+          })
+        };
+      //it for delete multiple product at onec when checked more that one
+  // Handler to toggle all checkboxes when click the top check box
+  const handleSelectAll = (e) => {
+  const isChecked = e.target.checked;
+    // Update all items' checked status
+    const updatedItems = productData.map((item) => ({
+      ...item,
+      checked: isChecked,
+    }));
+    setProductData(updatedItems);
+    // Update the sorted IDs state
+    if (isChecked) {
+      const ids = updatedItems.map((item) => item._id).sort((a, b) => a - b);
+      console.log(ids);
+      setSortedIds(ids);
+    }
+      else{
+        setSortedIds([]);
+      }
+  };
+  useEffect(() => { //it fetch all product from backend if panel close it hit teh get all product withour refersh the page
+      getProducts();
+    }, [context?.isOpenFullScreenPanel])
+  //to store all product data
+    const getProducts = async () => {
+      setIsLoading(true);
+      getData("/api/product/getAllProduct").then((res) => {
+        let productArr = [];
+        if (res?.error === false) {
+          //for selecting multiple product
+              for (let i = 0; i < res?.products?.length; i++) {
+                productArr[i] = res?.products[i];
+                productArr[i].checked = false; //to check added in all product such that it identify to delete multiple at same time
+              }
+          // reverse order so latest added comes on top
+          setTimeout(() => {
+            setIsLoading(false);
+            setProductData([...res.products].reverse());
+          }, 700);
+        } else {
+          console.log(res.error);
+        }
+      })
+    }
   return (
     <>
       <div className="w-full p-5 py-2 px-5 bg-[#f1faff]  border border-[rgba(0,0,0,0.1)] flex items-center gap-8 mb-5 justify-between rounded-md">
@@ -189,363 +282,258 @@ const [chart1Data, setChart1Data] = useState(
 
     {/* table added for recent product */}
 
-    <div className='card my-3 shadow-md sm:rounded-lg bg-white'>
-      <div className='flex items-center justify-between px-5 py-4'>
-        <h2 className='text-[19px] font-[600] mt-2'>Recent Orders</h2>
-      </div>
-      <div>
-         
-         <div className="relative overflow-x-auto shadow-md w-full py-5 px-8 rounded-md mt-5">
-                <table className="w-full text-sm text-left text-gray-700 bg-white">
-                    <thead className="text-xs uppercase bg-gray-100 text-gray-700">
-                    <tr>
-                        <th className="px-6 py-3">
-                            &nbsp;
-                        </th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Order Id</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Payment Id</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Products</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Name</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Phone Number</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Address</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">PinCode</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Total Amount</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Email</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">User Id</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Order Status</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Date</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="border-b dark:border-gray-700   bg-white">
-                        
-                            <td className="px-6 py-4 font-[500]"><Button className="!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-[#f1f1f1] " onClick={()=>{isShowOrderProduct(0)}}>
-                                {
-                                    isOpenOrderProduct===0? 
-                                    <FaAngleUp className="text-[16px] text-[rgba(0,0,0,0.7)]"  />
-                                    :
-                                    <FaAngleDown className="text-[16px] text-[rgba(0,0,0,0.7)]"  />
-                                }
-                            </Button></td>
-                            <td className="px-6 py-4 font-[500]">
-                                <span className='text-[#3872fa] font-[600]'>635585s588df445e5setd5255sa
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 font-[500]">
-                                <span className='text-[#3872fa] font-[600]'>pay_PTMoqESsdl562
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 font-[500]">Android 15</td>
-                            <td className="px-6 py-4 font-[500] whitespace-nowrap">Shivanand Gupta</td>
-                            <td className="px-6 py-4 font-[500]">6394176235</td>
-                            <td className="px-6 py-4 font-[500]">
-                                <span className="block w-[400px]">
-                                    Hi No 222 Street No 6 Adarsh MohallaMaujpur Delhi near shivam medical ph. +91-9643990046
-                                </span>
-                                </td>
-                            <td className="px-6 py-4 font-[500]">272172</td>
-                            <td className="px-6 py-4  font-bold">76,852</td>
-                            <td className="px-6 py-4 font-[500]">shivanandgupta316@gmail.com</td>
-                            <td className="px-6 py-4 font-[500]">
-                                <span className='text-[#3872fa] font-[600]'>635585s588df445e5setd5255sa
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 font-[500] "><Badge status="confirm"/></td>
-                            <td className="px-6 py-4 font-[500] whitespace-nowrap">2025-08-06</td>
-                        </tr> 
-                        {
-                            isOpenOrderProduct ===0 &&
-                                <tr>
-                            <td  colSpan="6" className="px-6 ">
-                            <div className="relative overflow-x-auto shadow-md w-full py-5 px-8 rounded-md ">
-                <table className="w-full text-sm text-left text-gray-700 bg-white">
-                    <thead className="text-xs uppercase bg-gray-100 text-gray-700">
-                    <tr>
-                        
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Product Id</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Product Title</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Image</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Quantity</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Sub Total</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Total Amount</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="border-b dark:border-gray-700   bg-white">
-                        
-                            <td className="px-6 py-4 font-[500]">
-                                <span className='text-gray-600'>635585s588df445e5setd5255sa
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 font-[500]">
-                                <span className='text-gray-600'>iPhone 16e 128 GB: Built for Apple Intelligence
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 font-[500]">
-                                <img src='https://m.media-amazon.com/images/I/61FMZ9rSZUL._SX679_.jpg'
-                                className='w-[40px] h-[40px] object-cover rounded-md'/>
-                            </td>
-                            <td className="px-6 py-4 font-[500] whitespace-nowrap">5</td>
-                            <td className="px-6 py-4 font-bold">69,599</td>
-                            <td className="px-6 py-4 font-bold">
-                                79,999
-                                </td>
-                           
-                        </tr> 
+     {/* recent product <section> with material ui </section> */}
+      <div className='card my-4 shadow-md sm:rounded-lg bg-white'>
 
-                        
-                    </tbody>
-                </table>
-                </div>
-                </td>
-                        </tr>
-                        }
-                        
-                    </tbody>
+        {/* filter added category */}
 
-                    {/* second row */}
-                    <tbody>
-                        <tr className="border-b dark:border-gray-700   bg-white">
-                        
-                            <td className="px-6 py-4 font-[500]"><Button className="!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-[#f1f1f1] " onClick={()=>{isShowOrderProduct(1)}}>
-                                {
-                                    isOpenOrderProduct===1? 
-                                    <FaAngleUp className="text-[16px] text-[rgba(0,0,0,0.7)]"  />
-                                    :
-                                    <FaAngleDown className="text-[16px] text-[rgba(0,0,0,0.7)]"  />
-                                }
-                            </Button></td>
-                            <td className="px-6 py-4 font-[500]">
-                                <span className='text-[#3872fa] font-[600]'>635585s588df445e5setd5255sa
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 font-[500]">
-                                <span className='text-[#3872fa] font-[600]'>pay_PTMoqESsdl562
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 font-[500]">Android 15</td>
-                            <td className="px-6 py-4 font-[500] whitespace-nowrap">Shivanand Gupta</td>
-                            <td className="px-6 py-4 font-[500]">6394176235</td>
-                            <td className="px-6 py-4 font-[500]">
-                                <span className="block w-[400px]">
-                                    Hi No 222 Street No 6 Adarsh MohallaMaujpur Delhi near shivam medical ph. +91-9643990046
-                                </span>
-                                </td>
-                            <td className="px-6 py-4 font-[500]">272172</td>
-                            <td className="px-6 py-4  font-bold">76,852</td>
-                            <td className="px-6 py-4 font-[500]">shivanandgupta316@gmail.com</td>
-                            <td className="px-6 py-4 font-[500]">
-                                <span className='text-[#3872fa]'>635585s588df445e5setd5255sa
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 font-[500] "><Badge status="confirm"/></td>
-                            <td className="px-6 py-4 font-[500] whitespace-nowrap">2025-08-06</td>
-                        </tr> 
-                        {
-                            isOpenOrderProduct ===1 &&
-                                <tr>
-                            <td  colSpan="6" className="px-6 ">
-                            <div className="relative overflow-x-auto shadow-md w-full py-5 px-8 rounded-md ">
-                <table className="w-full text-sm text-left text-gray-700 bg-white">
-                    <thead className="text-xs uppercase bg-gray-100 text-gray-700">
-                    <tr>
-                        
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Product Id</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Product Title</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Image</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Quantity</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Sub Total</th>
-                        <th scope="col" className="px-6 py-3 whitespace-nowrap">Total Amount</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="border-b dark:border-gray-700   bg-white">
-                        
-                            <td className="px-6 py-4 font-[500]">
-                                <span className='text-gray-600'>635585s588df445e5setd5255sa
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 font-[500]">
-                                <span className='text-gray-600'>iPhone 16e 128 GB: Built for Apple Intelligence
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 font-[500]">
-                                <img src='https://m.media-amazon.com/images/I/61FMZ9rSZUL._SX679_.jpg'
-                                className='w-[40px] h-[40px] object-cover rounded-md'/>
-                            </td>
-                            <td className="px-6 py-4 font-[500] whitespace-nowrap">5</td>
-                            <td className="px-6 py-4 font-bold">69,599</td>
-                            <td className="px-6 py-4 font-bold">
-                                79,999
-                                </td>
-                           
-                        </tr> 
-
-                        
-                    </tbody>
-                </table>
-                </div>
-                </td>
-                        </tr>
-                        }
-                        
-                    </tbody>
-                </table>
-                </div>
-        
-
-
+        <div className="flex items-center w-full pl-5 justify-between gap-5">
+          <div className="col w-[18%] mb-4 mt-2">
+            <h4 className="font-[600] text-[14px] mb-2">Category By</h4>
+          {
+              //if length of category array is not equal to zero then only show the drop down
+              context?.categoryData?.length !== 0 &&
+              <Select
+                labelId="demo-simple-select-label"
+                id="ProductCatDrop"
+                size="small"
+                className='w-full '
+                value={productCategory}
+                label="Category"
+                onChange={handleChangeProductCat}
+              >
+                {
+                  //it help to map the category array and show the drop down of category name
+                  context?.categoryData?.map((cat, index) => (
+                    <MenuItem value={cat?._id} key={index}
+                    >{cat?.name}</MenuItem>
+                  ))
+                }
+              </Select>
+            }
+            </div>
+          {/* filter for sub category */}
+             <div className="col w-[18%] mb-4 mt-2">
+            <h4 className="font-[600] text-[14px] mb-2">Sub Category By</h4>
+          {
+              //if length of sub category array is not equal to zero then only show the drop down
+              context?.categoryData?.length !== 0 &&
+              <Select
+                labelId="demo-simple-select-label"
+                id="ProductCatDrop"
+                size="small"
+                className='w-full '
+                value={productSubCategory}
+                label="Sub Category"
+                onChange={handleChangeProductSubCat}
+              >
+                {
+                  //it help to map the sub category array and show the drop down of category name
+                  context?.categoryData?.map((cat, index) => {
+                    return (
+                      cat?.children?.length !== 0 && cat?.children?.map((subcat, index) =>
+                      (
+                        <MenuItem value={subcat?._id} key={index}
+                        >{subcat?.name}</MenuItem>)
+                      )
+                    )
+                  })
+                }
+              </Select>
+            }
+            </div>
+          {/* filter for third level category */}
+           <div className="col w-[18%] mb-4 mt-2">
+            <h4 className="font-[600] text-[14px] mb-2">Third Level Category By</h4>
+               {
+              //if length of third level sub category array is not equal to zero then only show the drop down
+              context?.categoryData?.length !== 0 &&
+              <Select
+                labelId="demo-simple-select-label"
+                id="ProductCatDrop"
+                size="small"
+                className='w-full '
+                value={productThirdLevelSubCategory}
+                label="Sub Category"
+                onChange={handleChangeProductThirdLevelSubCat}
+              >
+                {
+                  //it help to map the third level sub category array and show the drop down of category name
+                  context?.categoryData?.map((cat) => {
+                    return (
+                      cat?.children?.length !== 0 && cat?.children?.map((subcat) => {
+                        return (
+                          subcat?.children?.length !== 0 && subcat?.children?.map((thirdcat, index) => {
+                            return (
+                              <MenuItem value={thirdcat?._id}
+                                onClick={() => selectThirdLevelSubCatByName(thirdcat?.name)} key={index}
+                              >{thirdcat?.name}</MenuItem>
+                            )
+                          }))
+                      })
+                    )
+                  })
+                }
+              </Select>
+            }
+            </div>
+          {/* thsi is for the search bar */}
+          <div className='col w-[20%] ml-auto'>
+            <SearchBox />
+          </div>
         </div>
-    </div>
+        <br />
 
-
-
- {/* recent product <section> with material ui </section> */}
-    <div className='card my-4 shadow-md sm:rounded-lg bg-white'>
-      <div className='flex items-center justify-between px-5 py-4'>
-        <h2 className='text-[19px] font-[600] mt-2'>Products</h2>
-      </div>
-      {/* filter added category */}
-
-        <div className="flex items-center w-full pl-5 justify-between ">
-            <div className="col w-[20%] mb-4">
-                <h4 className="font-[600] text-[13px] mb-2">Category</h4>
-                <Select
-                className='w-full'
-                size='small'
-          labelId="demo-simple-select-standard-label"
-          id="demo-simple-select-standard"
-          value={categoryFilterValue}
-          onChange={handleChangeCatFilter}
-          label="Category"
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          <MenuItem value={10}>Ten</MenuItem>
-          <MenuItem value={20}>Twenty</MenuItem>
-          <MenuItem value={30}>Thirty</MenuItem>
-        </Select>
-            </div>
-            <div className="col w-[25%] ml-auto flex items-center gap-3">
-                <Button className='btn-blue btn-sm !bg-green-500'>Export</Button>
-                <Button className='btn-blue btn-sm ' onClick={()=>{context.setisOpenFullScreenPanel({open:"true",model:"Add Product"})}}>Add Product</Button>
-            </div>
-            </div>
-            {/* table added */}
-         <TableContainer sx={{ maxHeight: 440 }}>
-        <Table stickyHeader aria-label="sticky table">
-          <TableHead >
-            <TableRow>
+        {/* table added */}
+        <TableContainer sx={{ maxHeight: 440 }}>
+          <Table stickyHeader aria-label="sticky table">
+            <TableHead >
+              <TableRow>
                 <TableCell >
-                    <Checkbox {...label} defaultChecked size='small'/>
+                  <Checkbox {...label} defaultChecked size='small'
+                  onChange={handleSelectAll}
+                  //it checked that all the data are checked or not
+                  checked={productData.length >0 ? productData.every((item)=>item.checked):false}
+                   />
                 </TableCell>
-               
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
+
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.id}
+                    align={column.align}
+                    style={{ minWidth: column.minWidth }}
+                  >
+                    {column.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {/* for loading the loader */}
+              {
+               isLoading ===false?(
+                productData?.length !== 0 && productData?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product, index) =>
+                (
+                  <TableRow key={index}>
+                    <TableCell style={{ minWidth: columns.minWidth }}>
+                      <Checkbox {...label} defaultChecked size='small'
+                      checked={product.checked === true ? true : false}
+                      //to check the checkbox for delete the id with index
+                      onChange={(e)=>handleCheckBoxChange(e,product._id,index)}
+                      />
+                    </TableCell>
+                    {/* product detail */}
+                    <TableCell style={{ minWidth: columns.minWidth }}>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 w-[350px]">
+                          <div className="img w-[65px] h-[65px] rounded-md overflow-hidden group">
+                            <Link to={`/product/${product?.id}`}  className="!text-gray-900 !no-underline hover:!text-[#3872fa]">
+                              <img
+                               src={product?.images[0]}
+                                className="w-full group-hover:scale-110 transition-all"
+                              />
+                            </Link>
+                          </div>
+                          <div className="info w-[75%]">
+                            <h3 className="font-[600] text-[12px] leading-4 ">
+                              <Link to={`/product/${product?.id}`} className="!text-gray-900 !no-underline hover:!text-[#3872fa]">
+                                {product?.name}
+                              </Link>
+
+                            </h3>
+                            <span className='text-[12px]'>{product?.brand}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    {/* category */}
+                    <TableCell style={{ minWidth: columns.minWidth }}>
+                      {product?.catName}
+                    </TableCell>
+                    {/* subcategory */}
+                    <TableCell style={{ minWidth: columns.minWidth }}>
+                      {product?.subCat}
+                    </TableCell>
+                    {/* price */}
+                    <TableCell style={{ minWidth: columns.minWidth }}>
+                      <div className="flex gap-1 flex-col">
+                        <span className="oldPrice line-through leading-3 text-gray-500 text-[14px] font-[500]">
+                          &#x20b9;{product?.oldPrice}
+                        </span>
+                        <span className="price text-[#3872fa] text-[14px] font-[600]">
+                           &#x20b9;{product?.price}
+                        </span>
+                      </div>
+                    </TableCell>
+                    {/* sales */}
+                    <TableCell style={{ minWidth: columns.minWidth }}>
+                      <p className='text-[14px] w-[80px]'>
+                        <span className='font-[600]'>{product?.sale}</span> sales
+                      </p>
+                    </TableCell>
+                    {/* rating */}
+                    <TableCell style={{ minWidth: columns.minWidth }}>
+                      <p className='text-[13px] w-[80px]'>
+                        <Rating name="half-rating-read" size='small' defaultValue={product.rating} precision={0.5}
+                         />
+                      </p>
+                    </TableCell>
+                    {/* stock */}
+                    <TableCell style={{ minWidth: columns.minWidth }}>
+                      <p className='text-[14px] w-[80px]'>
+                        <span className='font-[600]'>{product?.countInStock}</span>
+                      </p>
+                    </TableCell>
+                    {/* action */}
+                    <TableCell style={{ minWidth: columns.minWidth }}>
+                      <div className="flex items-center gap-1">
+                        <Button className="w-[35px] h-[35px] bg-[#f1f1f1] border border-[rgba(0,0,0,0.4)] !rounded-full hover:!bg-[#ccc]" style={{ minWidth: '35px' }}
+                        onClick={()=>context.setisOpenFullScreenPanel({
+                          open:true,
+                          model:'Edit product',
+                          id:product._id
+                        })}
+                        >
+                          <FiEdit3 className="text-[rgba(0,0,0,0.7)] text-[20px]" />
+                        </Button>
+                        <Link to={`/product/${product?._id}`}>
+                        <Button className="w-[35px] h-[35px] bg-[#f1f1f1] border border-[rgba(0,0,0,0.4)] !rounded-full hover:!bg-[#ccc]" style={{ minWidth: '35px' }}
+                        >
+                          <FaRegEye className="text-[rgba(0,0,0,0.7)] text-[20px]" />
+                        </Button>
+                        </Link>
+                        <Button className="w-[35px] h-[35px] bg-[#f1f1f1] border border-[rgba(0,0,0,0.4)] !rounded-full hover:!bg-[#ccc]" style={{ minWidth: '35px' }}
+                        onClick={()=>deleteProduct(product._id)}
+                        >
+                          <MdDeleteOutline className="text-[rgba(0,0,0,0.7)] text-[22px]" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+                )
+              )
+              :
+               <TableRow>
+              <TableCell colSpan={7}>
+                <div className="flex items-center justify-center w-full min-h-[400px]">
+                  <CircularProgress color="inherit" />
+                </div>
+              </TableCell>
             </TableRow>
-          </TableHead>
-          <TableBody>
-            <TableRow>
-                
-                <TableCell style={{minWidth: columns.minWidth}}>
-                        <Checkbox {...label} defaultChecked size='small'/>
-                </TableCell>
-                {/* product detail */}
-                <TableCell style={{minWidth: columns.minWidth}}>
-                        <div className="flex items-center gap-4">
-                               <div className="flex items-center gap-4 w-[350px]">
-                                    <div className="img w-[65px] h-[65px] rounded-md overflow-hidden group">
-                                        <Link to="/product/12456" className="!text-gray-900 !no-underline hover:!text-[#3872fa]">
-                                        <img
-                                        src="https://serviceapi.spicezgold.com/download/1753721820703_flexfive-total-hair-wellness-shampoo-strengthen-and-restore-damaged-hair-deep-repair-and-long-lasting-smoothness-suitable-for-all-hair-types-300-ml-pack-of-2-product-images-orvfvqsttsj-p611363019-0-202504281.jpg"
-                                        className="w-full group-hover:scale-110 transition-all"
-                                        />
-                                        </Link>
-                                    </div>
-        
-
-                                    <div className="info w-[75%]">
-                                    <h3 className="font-[600] text-[12px] leading-4 ">
-                                        <Link to="/product/12456" className="!text-gray-900 !no-underline hover:!text-[#3872fa]">
-                                        FLEXFIVE Total Hair Wellness Shampoo
-                                        </Link>
-                                        
-                                    </h3>
-                                    <span className='text-[12px]'>wellness</span>
-                                    </div> 
-                                    </div>
-                            </div>
-                </TableCell>
-                {/* category */}
-                <TableCell style={{minWidth: columns.minWidth}}>
-                        Wellness
-                </TableCell>
-                {/* subcategory */}
-                <TableCell style={{minWidth: columns.minWidth}}>
-                        Hair Care
-                </TableCell>
-                {/* price */}
-                <TableCell style={{minWidth: columns.minWidth}}>
-                        <div className="flex gap-1 flex-col">
-                                    <span className="oldPrice line-through leading-3 text-gray-500 text-[14px] font-[500]">
-                                    ₹1199.00
-                                    </span>
-                                    <span className="price text-[#3872fa] text-[14px] font-[600]">
-                                    ₹799.00
-                                    </span>
-                                </div>
-                </TableCell>
-                {/* sales */}
-                <TableCell style={{minWidth: columns.minWidth}}>
-                        <p className='text-[14px] w-[80px]'>
-                                    <span className='font-[600]'>45</span> sales
-                                </p>
-                </TableCell>
-                {/* stock */}
-                <TableCell style={{minWidth: columns.minWidth}}>
-                        <p className='text-[14px] w-[80px]'>
-                                    <span className='font-[600]'>15</span>
-                                </p>
-                </TableCell>
-                {/* action */}
-                <TableCell style={{minWidth: columns.minWidth}}>
-                        <div className="flex items-center gap-1">
-                                    <Button className="w-[35px] h-[35px] bg-[#f1f1f1] border border-[rgba(0,0,0,0.4)] !rounded-full hover:!bg-[#ccc]" style={{minWidth: '35px'}}>
-                                        <FiEdit3 className="text-[rgba(0,0,0,0.7)] text-[20px]" />
-                                    </Button>
-                                     <Button className="w-[35px] h-[35px] bg-[#f1f1f1] border border-[rgba(0,0,0,0.4)] !rounded-full hover:!bg-[#ccc]" style={{minWidth: '35px'}}>
-                                        <FaRegEye className="text-[rgba(0,0,0,0.7)] text-[20px]" />
-                                    </Button>
-                                     <Button className="w-[35px] h-[35px] bg-[#f1f1f1] border border-[rgba(0,0,0,0.4)] !rounded-full hover:!bg-[#ccc]" style={{minWidth: '35px'}}>
-                                        <MdDeleteOutline className="text-[rgba(0,0,0,0.7)] text-[22px]" />
-                                    </Button>
-                                 </div>
-                </TableCell>
-            </TableRow>
-
-            {/* second row */}
-            
-
-          </TableBody>
-        </Table>
-      </TableContainer>
-       <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={10}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+              }
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 100]}
+          component="div"
+          count={productData?.length} // total row according to data
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </div>
 
 {/* thsi is for the chart  */}

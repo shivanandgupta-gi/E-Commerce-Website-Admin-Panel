@@ -1,0 +1,58 @@
+.zoomProductSlider .swiper-slide{height: 100px !important;}
+.zoomProductSlider .swiper-button-next{bottom:0px !important; right:inherit !important;
+top: inherit !important;
+height: 30px !important;
+width: 100% !important;
+border-radius: 0px !important;
+}
+.zoomProductSlider .swiper-button-prev{top:20px !important; right:inherit !important;
+height: 30px !important;
+width: 100% !important;
+border-radius: 0px !important;
+
+}
+.zoomProductSlider .swiper-button-prev:hover{
+    opacity: 1 !important;
+}
+.zoomProductSlider .swiper-button-next:hover{
+    opacity: 1 !important;
+}
+.zoomProductSlider .swiper-button-next::after{
+    transform: rotate(90deg);
+}
+.zoomProductSlider .swiper-button-prev::after{
+    transform: rotate(90deg);
+}
+
+.zoomProductSlider .swiper-slide{
+    height: 80px !important;
+    overflow: hidden !important;
+    border-radius: 5px;
+
+}
+ .swiper-slide .iiz{
+    height: 450px !important;
+    overflow: hidden !important;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 100%;
+  width: 45px;
+  height: 45px;
+  min-width: 45px;
+  box-shadow: 0 1px 3px #0000001a, 0 1px 2px #0000001a !important;
+  transition: all 0.2s;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+  font-size: 22px !important;
+  color: #000;
+}
+
+.zoomProductSlider.space .swiper-wrapper{padding-top: 38px !important;}

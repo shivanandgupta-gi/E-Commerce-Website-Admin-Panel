@@ -2,6 +2,10 @@ import React, { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom';
 import OtpBox from '../../Componenets/OtpBox';
 import Button from '@mui/material/Button';
+import { useContext } from 'react';
+import { MyContext } from '../../App';
+import { postData } from '../../../utils/api';
+import { useNavigate } from 'react-router-dom';
 
 
 const VerifyOTP=()=> {
@@ -9,6 +13,44 @@ const VerifyOTP=()=> {
     const handleOtpChange=(value)=>{
         setOtp(value);
     }
+
+    const context=useContext(MyContext); //context is used 
+    
+    
+    const history=useNavigate();//after verify otp navigate to login page
+    
+        const verify=(e)=>{
+            e.preventDefault();
+            const actionType=localStorage.getItem("actionType",'forgot-password');//if user click on forgot password then get action type in local storage to check user want to verify or reset password
+            if(actionType !== "forgot-password"){ //if verify only email
+                postData("/api/user/verifyEmail",{
+                email:localStorage.getItem("userEmail"),
+                otp:otp
+            })
+            .then((res)=>{
+             if(res?.error === false){
+                context.openAlertBox("success",res?.message)
+                history("/login") //navigate to login page
+             }else{
+                context.openAlertBox("error",res?.message)
+             }
+            })
+            }
+            else{ //if reset password choose
+                postData("/api/user/forgot-password-otp-verify",{
+                email:localStorage.getItem("userEmail"),
+                otp:otp
+            })
+            .then((res)=>{
+             if(res?.error === false){
+                context.openAlertBox("success",res?.message)
+                history("/change-password") //navigate to password reset page
+             }else{
+                context.openAlertBox("error",res?.message)
+             }
+            })
+            }
+        }
   return (
     <section className="!bg-white w-full h-[100vh]  top-0 left-0">
         <header className="w-full fixed  top-0 left-0 px-4 py-3 flex items-center justify-between z-50">
@@ -36,7 +78,7 @@ const VerifyOTP=()=> {
                         </h1>
                             <br/>
                         <p className="text-center text-[15px]">
-                            OTP sent to &nbsp;<span className="text-[#3872fa] font-bold">shivananadgupta316@gmail.com</span>
+                            OTP sent to &nbsp;<span className="text-[#3872fa] font-bold">{localStorage.getItem("userEmail")}</span>
                             </p>
                            
                             <br/>
@@ -46,9 +88,9 @@ const VerifyOTP=()=> {
                             </div>
                             <br/>
                             <div className='w-[200px] m-auto'>
-                                <Button className='text-[#3872fa] btn-blue w-full'>Verify Otp</Button>
+                                <Button className='text-[#3872fa] btn-blue w-full' onClick={verify   }>Verify Otp</Button>
                             </div>
-                            
+                              
 
 
                     </div>

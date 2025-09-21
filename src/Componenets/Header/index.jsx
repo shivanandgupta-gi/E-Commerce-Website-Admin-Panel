@@ -16,7 +16,27 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { BsGraphDown } from "react-icons/bs";
 import { MyContext } from "../../App";
 import { Link } from "react-router-dom";
-
+import { getData } from "../../../utils/api";
+import React from 'react'
+import { useNavigate } from 'react-router-dom';
+import ProductAdd from "../AddProduct";
+import AddHomeSlideUploadUpload from "../../Pages/HomeSliderBannerUpload/AddHomeSlideUpload";
+import AddCategory from "../../Pages/Category/AddCategory";
+import AddCategorys from "../../Pages/Category/AddSubCategory";
+import AddAddress from "../../Pages/Address/addAddress";
+import EditCategory from "../../Pages/Category/EditCategory";
+//for product uploadin
+import Dialog from '@mui/material/Dialog';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import { IoMdClose } from "react-icons/io";
+import Slide from '@mui/material/Slide';
+import EditProduct from "../AddProduct/EditProduct";
+import AddBannerV1 from "../../Pages/Banner/AddBannerV1";
+import EditBannerV1 from "../../Pages/Banner/EditBannerV1";
+import AddBlog from "../../Pages/Blog/AddBlog";
+import EditBlog from "../../Pages/Blog/EditBlog";
 
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -28,11 +48,25 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-
+//for product uploading page
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const Header = () => {
-
+  
+  
+  //backend
   const context=useContext(MyContext); //context used
+  const [anchorEl, setAnchorEl] = useState(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+    const history = useNavigate();
 
 // myACC mens my account open and close click on it and it open small widwo
   const [anchorMyAcc, setAnchorMyAcc] = useState(null);
@@ -44,9 +78,27 @@ const Header = () => {
     setAnchorMyAcc(null);
   };
 
+
+   //logout page api
+      const logout=()=>{
+        setAnchorMyAcc(null);
+          setAnchorEl(null); //menu null means not shown
+          getData(`/api/user/logout?token=${localStorage.getItem('accesstoken')}`,{withCredentials:true}).then((res)=>{
+              console.log(res);
+              if(res?.success === true){
+                  context.setIsLogin(false);
+                  localStorage.removeItem('accesstoken');
+                  localStorage.removeItem('refreshtoken');
+                  history("/");
+              }  
+          })
+      }
+
+      
   return (
+    <>
     <header className={`w-full py-2 h-[50px] pr-7 ${context.isSidebarOpen === true ? "pl-75":"pl-5"} bg-[#fff]   flex items-center 
-    shadow-md justify-between transition-all`}>
+    shadow-md justify-between transition-all fixed top-0 left-0 z-[50]`}>
       {/* Left-side Buttons: Menu + Search */}
       <div className="flex gap-3 items-center part1">
         {/* Menu Button */}
@@ -127,18 +179,19 @@ const Header = () => {
                     />
                 </div>
                  <div className="info">
-                    <h3 className="text-[15px] font-[500] leading-5">Shivnaand Gupta</h3>
-                    <p className="text-[12px] font-[400] opacity-70">admin-01@ecme.com</p>
+                    <h3 className="text-[15px] font-[500] leading-5">{context?.userData?.name}</h3>
+                    <p className="text-[12px] font-[400] opacity-70">{context?.userData?.email}</p>
                     </div>
             </div>
         </MenuItem>
         <Divider />
-        
+        <Link to="/profile">
         <MenuItem
             onClick={handleCloseMyAcc}
             className="flex items-center gap-3">
             <FaRegUser className="text-[18px]" /> <span className="text-[14px]">Profile</span>
         </MenuItem>
+        </Link>
         <MenuItem
             onClick={handleCloseMyAcc}
             className="flex items-center gap-3">
@@ -151,7 +204,11 @@ const Header = () => {
         </MenuItem>
         <Divider/>
          <MenuItem
-            onClick={handleCloseMyAcc}
+             onClick={() => { 
+              handleCloseMyAcc;
+                handleClose(); 
+                logout(); 
+              }} 
             className="flex items-center gap-3">
             <IoMdLogOut className="text-[18px]"/> <span className="text-[14px]">Sign Out</span>
         </MenuItem>
@@ -166,9 +223,79 @@ const Header = () => {
        
       </div>
        </div>
-
-        
     </header>
+
+         {/* for product uploading material ui new page open  */}
+        <Dialog
+        fullScreen
+        open={context?.isOpenFullScreenPanel.open}
+       onClose={() => context?.setisOpenFullScreenPanel({ open: false })}
+        slots={{
+          transition: Transition,
+        }}
+        
+      >
+        <AppBar sx={{ position: 'relative' }}>
+          <Toolbar>
+            <IconButton
+              edge="start"
+              color="inherit"
+             onClick={() => context?.setisOpenFullScreenPanel({ open: false })}
+              aria-label="close"
+            >
+              <IoMdClose className="text-gray-700"/>
+            </IconButton>
+            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+              <span className="text-gray-700">{context?.isOpenFullScreenPanel?.model}</span>
+            </Typography>
+            
+          </Toolbar>
+        </AppBar>
+        {/* working of add product */}
+        {
+          context.isOpenFullScreenPanel?.model ==="Add Product" && <ProductAdd/>
+        }
+        {/* for slide upload on home page */}
+        {
+          context.isOpenFullScreenPanel?.model ==="Add Home Slide" && <AddHomeSlideUploadUpload/>
+        }
+        {
+          context.isOpenFullScreenPanel?.model ==="Add Category" &&    <AddCategory/>    }
+         {
+          context.isOpenFullScreenPanel?.model ==="Add New Sub Cat" && <AddCategorys/>
+        }
+        {/* for the user address added */}
+        {
+          context.isOpenFullScreenPanel?.model === "address added"&& <AddAddress/> 
+        }
+        {/* for edit category */}
+        {
+          context.isOpenFullScreenPanel?.model === "Edit Category"&& <EditCategory/>
+        }
+        {/* for edit product */}
+        {
+          context.isOpenFullScreenPanel?.model === "Edit product"&& <EditProduct/>
+        }
+        {/* for adding the banner version1 like small banner */}
+        {
+          context.isOpenFullScreenPanel?.model === "Add BannerV1"&& <AddBannerV1/>
+        }
+        {/* for edit the banner version1 like small banner */}
+        {
+          context.isOpenFullScreenPanel?.model === "Edit BannerV1"&& <EditBannerV1/>
+        }
+        {/* for adding the blog */}
+        {
+          context.isOpenFullScreenPanel?.model === "Add Blog"&& <AddBlog/>
+        }
+        {/* for edit the blog */}
+        {
+          context.isOpenFullScreenPanel?.model === "Edit Blog"&& <EditBlog/>
+        }
+        
+      </Dialog>
+
+</>
   );
 };
 

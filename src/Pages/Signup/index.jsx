@@ -10,14 +10,75 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { FaEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { postData } from '../../../utils/api';
+import { useContext } from 'react';
+import { MyContext } from '../../App';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
+
+//thsi is register page
 const SignUp=()=> {
     const [loadingGoogle, setLoadingGoogle] = useState(false);
     const [loadingFb, setLoadingFb] = useState(false);
     const [isPasswordShow,setIsPasswordShow]=useState(false);
 
-     function handleClickGoogle() {
+      //backend code request send to backend
+      //sending data on server usese state hook
+      const[isLoading,setIsLoading]=useState(false);//thsi for loading
+      const [formFields,setFormFields]=useState({
+        name:'',
+        email:'',  
+        password:'',
+      })
+      //navigation element to go on otp page without router
+    const history=useNavigate();
+      const context=useContext(MyContext); //context used
+    const onChangeInput=(e)=>{
+        setFormFields({...formFields,[e.target.name]:e.target.value})
+    }
+    //if any field empty disabeld button it check the field
+      const validValue=Object.values(formFields).every(el=>el);
+      const handleSubmit=(e)=>{
+        e.preventDefault();
+        setIsLoading(true);
+        //toster
+        if(formFields.name === ""){
+          context.openAlertBox("error","please enter your name")
+          return false; 
+        }
+         if(formFields.email === ""){
+          context.openAlertBox("error","please enter your Email")
+          return false; 
+        }
+         if(formFields.password === ""){
+          context.openAlertBox("error","please enter your Password")
+          return false; 
+        }
+        //api called
+        postData("/api/user/register",formFields).then((res)=>{
+          console.log(res);
+          if(res?.error !== true){
+            context.openAlertBox("success","verify your email for Email.")
+             localStorage.setItem("userEmail",formFields.email);//for user email store in local storage
+             setIsLoading(false);
+              setFormFields({
+                name:'',
+                email:'',
+                password:'',
+              })
+              history("/verify"); //verify router in index.js//otp page open automatic when otp send
+          }
+          else{
+            context.openAlertBox("error","email already exists.")
+            setIsLoading(false);
+          }
+      })  
+      }
+
+      //this is google button not backend part for google open or facboodk open
+    function handleClickGoogle() {
     setLoadingGoogle(true);
   }
   function handleClickFb() {
@@ -95,10 +156,13 @@ const SignUp=()=> {
                         </div>
                             <br/>
                         {/* name password input fields for login */}
-                        <form className="w-full px-8 mt-3">
+                        <form className="w-full px-8 mt-3" onSubmit={handleSubmit}>
                             <div className="form-group mb-4 w-full">
                                 <h4 className="text-[14px] font-[500] mb-1">Full Name</h4>
                                 <input
+                                  name='name'
+                                  value={formFields.name}
+                                  onChange={onChangeInput}
                                  placeholder="Enter your name"
                                 type="text"
                                 className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
@@ -107,6 +171,9 @@ const SignUp=()=> {
                             <div className="form-group mb-4 w-full">
                                 <h4 className="text-[14px] font-[500] mb-1">Email</h4>
                                 <input
+                                 name='email'
+                                  value={formFields.email}
+                                  onChange={onChangeInput}
                                  placeholder="Enter your email"
                                 type="email"
                                 className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
@@ -116,6 +183,9 @@ const SignUp=()=> {
                                <h4 className="text-[14px] font-[500] mb-1">Password</h4>
                                 <div className="relative w-full">
                                 <input
+                                 name='password'
+                                  value={formFields.password}
+                                  onChange={onChangeInput}
                                 placeholder="Enter your password"
                                     type={isPasswordShow ? 'text' : 'password'} 
                                     className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
@@ -146,7 +216,14 @@ const SignUp=()=> {
 
                                 </div>
                                  {/* sign in button added */}
-                                    <Button className='btn-blue btn-lg w-full'>Sign Up</Button>
+                                    <Button type="submit" className='btn-blue btn-lg w-full'  disabled={!validValue }>
+                                         {
+                                            isLoading===true ?
+                                            <CircularProgress color="inherit" />
+                                            :
+                                            'Register'
+                                        } 
+                                    </Button>
 
                         </form>
                     </div>

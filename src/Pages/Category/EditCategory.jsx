@@ -1,19 +1,18 @@
-import React, { useContext, useState } from 'react'
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState } from 'react'
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import { IoMdClose } from "react-icons/io";
 import UploadBox from '../../Componenets/UploadBox';
 import Button from '@mui/material/Button';
 import { IoMdCloudUpload } from "react-icons/io";
-import { deleteImages, postData } from '../../../utils/api';
+import { deleteImages, editData, getData, postData } from '../../../utils/api';
 import { MyContext } from '../../App';
 import CircularProgress from '@mui/material/CircularProgress';//for loading
 
 
-const AddCategory = () => {
+const EditCategory = () => {
   //backend
-  const history=useNavigate();
+  
   //for stroring the data in formfields for the input
   const [previews, setPreviews] = useState([]) //image upload
   const [isLoading, setIsLoading] = useState(false); //this for loading (loader circular movve)
@@ -29,8 +28,19 @@ const AddCategory = () => {
         ...formFields,
         [e.target.name]: e.target.value
       }
-    }) 
+    })
   }
+  useEffect(()=>{
+    const id=context?.isOpenFullScreenPanel?.id;
+    getData(`/api/category/${id}`).then((res)=>{
+      //set the data in formfields or in input fields
+       setFormFields(prev => ({
+      ...prev,
+      name: res?.category?.name || "", //for name save
+    }));
+    setPreviews( res?.category?.images || []) //for images save
+    })
+  },[context?.isOpenFullScreenPanel?.id]) 
   //for image shown in box
   const setPreviewsFun = (newImages) => {
     const imagesArray = Array.isArray(newImages) ? newImages : [newImages];
@@ -81,16 +91,9 @@ const AddCategory = () => {
       parentId: formFields.parentId || null,
       images: previews
     };
-    postData("/api/category/create", payload).then((res) => {
-      setTimeout(() => {
-        setIsLoading(false);
-        context.openAlertBox("success", "Category Created Successfully")
-        context.setisOpenFullScreenPanel({
-          open:false
-        })
-        history("/category");
-      }, 2500);
-     
+    editData(`/api/category/${context.isOpenFullScreenPanel.id}`, payload).then((res) => {
+      setIsLoading(false);
+      context.openAlertBox("success", "Category updated Successfully")
     })
   }
   return (
@@ -112,7 +115,7 @@ const AddCategory = () => {
           </div>
           <br />
           {/* multiple used for multiple photo upload */}
-          {/* when we add shown that image and we can remove it before uploading*/}
+          {/* when we add shown that image and we can remove it */}
           <div className='grid grid-cols-7 gap-4 mt-3'>
             {
               previews.length !== 0 && previews.map((image, index) => (
@@ -137,7 +140,7 @@ const AddCategory = () => {
                           style: { transitionDelay: "1s" },
                         }}
                         src={image} // use normal <img> attributes as props
-                      />
+                      /> 
                     </div>
                   </div>
                 </div>
@@ -157,7 +160,7 @@ const AddCategory = () => {
                 <CircularProgress color="inherit" />
               ) :
                 <>
-                  <IoMdCloudUpload className='text-[25px] text-white' />Publish and View
+                  <IoMdCloudUpload className='text-[25px] text-white' />Update Category
                 </>
             }
           </Button>
@@ -167,4 +170,4 @@ const AddCategory = () => {
   )
 }
 
-export default AddCategory;
+export default EditCategory;

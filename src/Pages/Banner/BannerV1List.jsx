@@ -30,7 +30,7 @@ const columns = [
   { id: 'Action', label: 'Action', minWidth: 100 },
 ];
 
-const HomeBannerSlider = () => {
+const BannerV1List = () => {
   //for filter in table
   const [categoryFilterValue, setcategoryFilterValue] = useState('');
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -59,34 +59,31 @@ const HomeBannerSlider = () => {
     getSlide(); //it function to get item
   }, [context.isOpenFullScreenPanel]) //if after adding panel down then fetch the data
   const getSlide=()=>{
-    getData("/api/slide/getSlide").then((res)=>{
+    getData("/api/banner/getbanner").then((res)=>{
       if(res.error === false){
-        const sorted = res.data.sort((a, b) => 
-          new Date(b.createdAt) - new Date(a.createdAt) // latest upload image first on top shown
-        );
-        setSlideData(res.data);
+        setSlideData(res.banner);
       }
     })
   }
    //to remove all the slide on click delete button
     const deleteSlide=(id)=>{
-      deleteData(`/api/slide/${id}`).then((res)=>{
+      deleteData(`/api/banner/${id}`).then((res)=>{
         getSlide();
-        context.openAlertBox("success", "slide deleted successfully")
+        context.openAlertBox("success", "banner deleted successfully")
       })
     }
   return (
     <>
       <div className='flex items-center justify-between px-2 py-0 mt-4'>
-        <h2 className='text-[19px] font-[600] '>Home Slider Banners</h2>
+        <h2 className='text-[19px] font-[600] '>Banners List</h2>
         <div className="col w-[25%] ml-auto flex items-center justify-end gap-3">
           <Button className='btn-blue btn-sm ml-auto' onClick={() => {
             context.setisOpenFullScreenPanel({
               open: true,
-              model: 'Add Home Slide'
+              model: 'Add BannerV1'
             })
           }}>
-            <IoMdAdd className='text-white text-[18px]' /> Add Home Slide
+            <IoMdAdd className='text-white text-[18px]' /> Add Banner
           </Button>
         </div>
       </div>
@@ -127,7 +124,7 @@ const HomeBannerSlider = () => {
                       <div className="flex items-center gap-4 w-[350px]">
                         <div className="img w-full  rounded-md overflow-hidden group">
                             <img
-                              src={item.images}
+                              src={item.images[0]}
                               className="w-full group-hover:scale-110 transition-all"
                             />
                         </div>
@@ -138,7 +135,14 @@ const HomeBannerSlider = () => {
                   <TableCell width={100} >
                     <div className="flex items-center gap-5">
                       <Button className="w-[35px] h-[35px] bg-[#f1f1f1] border border-[rgba(0,0,0,0.4)] !rounded-full hover:!bg-[#ccc]" style={{ minWidth: '35px' }}
-                      
+                       onClick={() => {
+                              // open the edit category click on edit buttom
+                              context.setisOpenFullScreenPanel({
+                                open: true,
+                                model: 'Edit BannerV1',
+                                id: item?._id,
+                              })
+                            }}
                       >
                         <FiEdit3 className="text-[rgba(0,0,0,0.7)] text-[20px]" />
                       </Button>
@@ -169,4 +173,4 @@ const HomeBannerSlider = () => {
   )
 }
 
-export default HomeBannerSlider;
+export default BannerV1List;

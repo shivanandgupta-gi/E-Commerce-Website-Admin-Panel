@@ -8,7 +8,7 @@ import Button from '@mui/material/Button';
 const ForgotPass=()=> {
    
   
-  return (
+  return (  
     <section className="!bg-white h-[100vh]  top-0 left-0 w-full">
         <header className="w-full fixed  top-0 left-0 px-4 py-3 flex items-center justify-between z-50">
             {/* logo */}

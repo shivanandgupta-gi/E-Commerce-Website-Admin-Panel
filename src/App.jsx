@@ -6,48 +6,59 @@ import Dashboard from "./Pages/Dashboard";
 import Login from "./Pages/Login";
 import SignUp from "./Pages/Signup";
 import Products from "./Pages/Products";
-//for product uploadin
-import Dialog from '@mui/material/Dialog';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import { IoMdClose } from "react-icons/io";
-
 import Slide from '@mui/material/Slide';
-import ProductAdd from "./Componenets/AddProduct";
 import HomeBannerSliderUpload from "./Pages/HomeSliderBannerUpload";
-import AddHomeSlideUploadUpload from "./Pages/HomeSliderBannerUpload/AddHomeSlideUpload";
 import Category from "./Pages/Category";
 import SubCategory from "./Pages/Category/SubCategory";
-import AddCategorys from "./Pages/Category/AddSubCategory";
-import AddCategory from "./Pages/Category/AddCategory";
 import Users from "./Pages/Users";
 import Orders from "./Pages/Orders";
 import ForgotPass from "./Pages/ForgotPass";
 import VerifyOTP from "./Pages/VerifyOTP";
 import ChangePass from "./Pages/ChangePass";
+import toast, { Toaster } from 'react-hot-toast';
+import { getData } from "../utils/api";
+import { useEffect } from "react";
+import Profile from "./Pages/Profile";
+import ProductDetail from "./Pages/Products/ProductDetail";
+import AddRAM from "./Pages/Products/AddRAM";
+import AddWeight from "./Pages/Products/AddWeight";
+import AddSize from "./Pages/Products/AddSize";
+import HomeBannerSlider from "./Pages/HomeSliderBannerUpload";
+import BannerV1List from "./Pages/Banner/BannerV1List";
+import BlogList from "./Pages/Blog";
 //for product uploading page
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+
 const MyContext = createContext();
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLogin, setIsLogin]=useState(false);
   //this is for the product uploading to open full screen
+  const [userData,setUserData]=useState(null);//for user name and password shown on profile
   const [isOpenFullScreenPanel,setisOpenFullScreenPanel]=useState({
     open:false,
-    model:''
+    model:'',
+    id:''
   });
    const handleClose = () => {
-    setisOpenFullScreenPanel({
-      open:false
-    });
+      console.log("Close triggered");   // ✅ check if it runs
+      setisOpenFullScreenPanel(prev => ({
+    ...prev,
+    open: false
+  }));
   };
-
-
+  const [categoryData, setcategoryData] = useState([]); //it store the data from backend of category from addcategory component
+  //this is for the navigation
+  //const history=useNavigate();
+   //toster function
+  const openAlertBox=(status,msg)=>{
+    if(status==="success"){
+      toast.success(msg);
+    }
+    else if(status==="error"){
+      toast.error(msg);
+    }
+  }
   const router = createBrowserRouter([
     //dashboard route
     {
@@ -108,7 +119,7 @@ function App() {
               <Sidebar />
             </div>
             <div className={`contentRight py-4 px-5  ${isSidebarOpen===true ? "w-[82%]" : "w-[100%]"} transition-all`}>
-              <HomeBannerSliderUpload/>
+              <HomeBannerSlider/>
             </div>
           </div>
         </section>
@@ -203,57 +214,189 @@ function App() {
        <ChangePass/>
       ),
     },
+    //for user profile
+     {
+      path: "/profile",
+      element: (
+        <section className="min">
+          <Header />
+          <div className="contentMain flex">
+            <div className={`sidebarWrapper overflow-hidden ${isSidebarOpen===true ? "w-[18%]" : "w-[0px] opacity-0"} transition-all`}>
+              <Sidebar />
+            </div>
+            <div className={`contentRight py-4 px-5  ${isSidebarOpen===true ? "w-[82%]" : "w-[100%]"} transition-all`}>
+              <Profile/>
+            </div>
+          </div>
+        </section>
+      ),
+    },
+    //for user detail
+     {
+      path: "/product/:id",
+      element: (
+        <section className="min">
+          <Header />
+          <div className="contentMain flex">
+            <div className={`sidebarWrapper overflow-hidden ${isSidebarOpen===true ? "w-[18%]" : "w-[0px] opacity-0"} transition-all`}>
+              <Sidebar />
+            </div>
+            <div className={`contentRight py-4 px-5  ${isSidebarOpen===true ? "w-[82%]" : "w-[100%]"} transition-all`}>
+              <ProductDetail/>
+            </div>
+          </div>
+        </section>
+      ),
+    },
+    //for add rams
+    {
+      path: "/product/rams",
+      element: (
+        <section className="min">
+          <Header />
+          <div className="contentMain flex">
+            <div className={`sidebarWrapper overflow-hidden ${isSidebarOpen===true ? "w-[18%]" : "w-[0px] opacity-0"} transition-all`}>
+              <Sidebar />
+            </div>
+            <div className={`contentRight py-4 px-5  ${isSidebarOpen===true ? "w-[82%]" : "w-[100%]"} transition-all`}>
+              <AddRAM/>
+            </div>
+          </div>
+        </section>
+      ),
+    },
+    //for add weight
+     {
+      path: "/product/weight",
+      element: (
+        <section className="min">
+          <Header />
+          <div className="contentMain flex">
+            <div className={`sidebarWrapper overflow-hidden ${isSidebarOpen===true ? "w-[18%]" : "w-[0px] opacity-0"} transition-all`}>
+              <Sidebar />
+            </div>
+            <div className={`contentRight py-4 px-5  ${isSidebarOpen===true ? "w-[82%]" : "w-[100%]"} transition-all`}>
+              <AddWeight/>
+            </div>
+          </div>
+        </section>
+      ),
+    },
+    //for add size
+     {
+      path: "/product/size",
+      element: (
+        <section className="min">
+          <Header />
+          <div className="contentMain flex">
+            <div className={`sidebarWrapper overflow-hidden ${isSidebarOpen===true ? "w-[18%]" : "w-[0px] opacity-0"} transition-all`}>
+              <Sidebar />
+            </div>
+            <div className={`contentRight py-4 px-5  ${isSidebarOpen===true ? "w-[82%]" : "w-[100%]"} transition-all`}>
+              <AddSize/>
+            </div>
+          </div>
+        </section>
+      ),
+    },
+     //BannerV1 banner page rote mini ads
+    {
+      path: "/bannerV1List",
+      element: (
+        <section className="min">
+          <Header />
+          <div className="contentMain flex">
+            <div className={`sidebarWrapper overflow-hidden ${isSidebarOpen===true ? "w-[18%]" : "w-[0px] opacity-0"} transition-all`}>
+              <Sidebar />
+            </div>
+            <div className={`contentRight py-4 px-5  ${isSidebarOpen===true ? "w-[82%]" : "w-[100%]"} transition-all`}>
+              <BannerV1List/>
+            </div>
+          </div>
+        </section>
+      ),
+    },
+    //adding for blog
+    {
+      path: "/blogList",
+      element: (
+        <section className="min">
+          <Header />
+          <div className="contentMain flex">
+            <div className={`sidebarWrapper overflow-hidden ${isSidebarOpen===true ? "w-[18%]" : "w-[0px] opacity-0"} transition-all`}>
+              <Sidebar />
+            </div>
+            <div className={`contentRight py-4 px-5  ${isSidebarOpen===true ? "w-[82%]" : "w-[100%]"} transition-all`}>
+              <BlogList/>
+            </div>
+          </div>
+        </section>
+      ),
+    },
   ]);
+
+
+    //for login user show logo or user profile or not 
+     useEffect(()=>{
+       const token=localStorage.getItem('accesstoken');
+       if(token !== undefined && token!==null && token !== ''){
+         setIsLogin(true);
+         getData('/api/user/user-details').then((res)=>{
+           setUserData(res.data);
+           //this for if user logged out for long time the login open and logout
+           if (res?.response?.data?.message === "You have not login") {
+              localStorage.removeItem("accesstoken");
+              localStorage.removeItem("refreshtoken");
+              alertBox("error", "Your session is closed please login again");
+              setIsLogin(false);
+              window.location.href = "/login";
+            //  //history("/login"); // Navigate without reload
+            }
+         })
+       }
+       else{
+         setIsLogin(false);
+       }
+     },[isLogin]
+     )
+     useEffect(() => {
+         getData("/api/category/getcategory").then((res) => {
+           setcategoryData(res?.categories);//fetch data from categories
+         })
+       },[]) //if we not add [] then it will run the useEffect function and it will fetch the data from backend and it will store in the categoryData state variable infinite time
+       const [addressData,setAddressData]=useState([]);//to store the address data from backend
+       const setAddressDatas=()=>{
+        getData(`/api/address/get?userId=${userData?._id}`).then((res)=>{
+          if(res?.error === false){
+              setAddressData(res?.data)  
+              console.log("set data is ", addressData)
+          }
+      })
+       }; //dummy function to avoid error in add address page
+
+       // 🟢 Fetch addresses whenever userData is available or changes
+useEffect(() => {
+  if (userData?._id) {
+    setAddressDatas();
+  }
+}, [userData?._id]); 
 
   const values = { isSidebarOpen, setIsSidebarOpen,
     isLogin, setIsLogin
-    ,isOpenFullScreenPanel,setisOpenFullScreenPanel
-
+    ,isOpenFullScreenPanel,setisOpenFullScreenPanel,
+    openAlertBox,
+    userData,setUserData,
+    setcategoryData,categoryData,
+    addressData,setAddressData,
+    setAddressDatas
    };
-
+   
+   
   return (
     <MyContext.Provider value={values}>
       <RouterProvider router={router} />
-
-      {/* for product uploadin material ui new page open  */}
-        <Dialog
-        fullScreen
-        open={isOpenFullScreenPanel.open}
-        onClose={handleClose}
-        slots={{
-          transition: Transition,
-        }}
-      >
-        <AppBar sx={{ position: 'relative' }}>
-          <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={handleClose}
-              aria-label="close"
-            >
-              <IoMdClose className="text-gray-700"/>
-            </IconButton>
-            <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
-              <span className="text-gray-700">{isOpenFullScreenPanel?.model}</span>
-            </Typography>
-            
-          </Toolbar>
-        </AppBar>
-        {/* working of add product */}
-        {
-          isOpenFullScreenPanel?.model ==="Add Product" && <ProductAdd/>
-        }
-        {/* for slide upload on home page */}
-        {
-          isOpenFullScreenPanel?.model ==="Add Home Slide" && <AddHomeSlideUploadUpload/>
-        }
-        {
-          isOpenFullScreenPanel?.model ==="Add Category" &&    <AddCategory/>    }
-         {
-          isOpenFullScreenPanel?.model ==="Add New Sub Cat" && <AddCategorys/>
-        }
-      </Dialog>
+       {/* this is for notification like done */}
+      <Toaster />
     </MyContext.Provider>
   );
 }

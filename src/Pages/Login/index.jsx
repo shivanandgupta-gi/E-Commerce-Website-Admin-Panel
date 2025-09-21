@@ -10,7 +10,11 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { FaEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
-
+import { postData } from '../../../utils/api';
+import { useContext } from 'react';
+import { MyContext } from '../../App';
+import { useNavigate } from 'react-router-dom';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const Login=()=> {
     const [loadingGoogle, setLoadingGoogle] = useState(false);
@@ -23,6 +27,81 @@ const Login=()=> {
   function handleClickFb() {
     setLoadingFb(true);
   }
+
+  //backend part
+   //sending data on server usese state hook
+    const[isLoading,setIsLoading]=useState(false);//thsi for loading
+    const [formFields,setFormFields]=useState({
+      email:'',
+      password:'',
+    })
+    //navigation element to go on otp page without router
+    const history=useNavigate();
+    const context=useContext(MyContext);
+  
+    const onChangeInput=(e)=>{ //this for input change in input area
+      setFormFields({...formFields,[e.target.name]:e.target.value})
+    }
+  
+    //if any field empty disabeld button it check the field
+      const validValue=Object.values(formFields).every(el=>el);
+      const handleSubmit=(e)=>{
+        e.preventDefault();
+        setIsLoading(true);
+        //toster
+         if(formFields.name === ""){
+          context.openAlertBox("error","please enter your Email")
+          return false; 
+        }
+         if(formFields.name === ""){
+          context.openAlertBox("error","please enter your Password")
+          return false; 
+        }
+        //api called
+        postData("/api/user/login",formFields,{withCredentials:true}).then((res)=>{
+          console.log(res);
+          if(res?.error !== true){
+            context.openAlertBox("success","Login Successfully.")
+             localStorage.setItem("userEmail",formFields.email);//for user email store in local storage
+             setIsLoading(false);
+              setFormFields({
+                email:'',
+                password:'',
+              })
+              localStorage.setItem("accesstoken" , res.data?.accesstoken)
+              localStorage.setItem("refreshtoken", res.data?.refreshToKen)
+  
+              //this for shown on main page that user login menas user profile shown
+              context.setIsLogin(true);
+              history("/"); //verify router in index.js//otp page open automatic when otp send
+          }
+          else{
+            context.openAlertBox("error","email already exists.")
+            setIsLoading(false);
+          }
+      })  
+      }
+      //for forgot password
+    const forgotPassword=()=>{ //if password is forgot
+      if(formFields.email === ""){ //if email is empty
+        context.openAlertBox("error","please enter your Email")
+        return false; 
+      }
+      context.openAlertBox("success", `OTP sent to ${formFields.email}`)
+      localStorage.setItem("userEmail",formFields.email);//for user email store in local storage
+      localStorage.setItem("actionType",'forgot-password');//if user click on forgot password then store action type in local storage 
+  
+        postData("/api/user/forgot-password", { email: formFields.email })
+            .then((res) => {
+                if (res && res.error === false) {  // or use if(res?.success)
+                    context.openAlertBox("success", `OTP sent to ${formFields.email}`);
+                    history("/verify");
+                } else {
+                    context.openAlertBox("error", res?.message || "Failed to send OTP");
+                }
+            });
+
+    } 
   return (
     <section className="!bg-white w-full   top-0 left-0">
         <header className="w-full fixed  top-0 left-0 px-4 py-3 flex items-center justify-between z-50">
@@ -44,7 +123,7 @@ const Login=()=> {
                 <Button className="!rounded-full !text-[rgba(0,0,0,0.8)] !px-5 flex gap-1">
                     <FaRegUser className="text-[15px]" /> Sign Up
                 </Button>
-                </NavLink>
+                </NavLink>  
                 </div>
         </header>
                 {/* for background image */}
@@ -95,10 +174,13 @@ const Login=()=> {
                         </div>
                             <br/>
                         {/* name password input fields for login */}
-                        <form className="w-full px-8 mt-3">
+                        <form className="w-full px-8 mt-3" onSubmit={handleSubmit}>
                             <div className="form-group mb-4 w-full">
                                 <h4 className="text-[14px] font-[500] mb-1">Email</h4>
                                 <input
+                                name="email"
+                                value={formFields.email}
+                                onChange={onChangeInput}
                                  placeholder="Enter your email"
                                 type="email"
                                 className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
@@ -108,6 +190,9 @@ const Login=()=> {
                                <h4 className="text-[14px] font-[500] mb-1">Password</h4>
                                 <div className="relative w-full">
                                 <input
+                                 name="password"
+                                value={formFields.password}
+                                onChange={onChangeInput}
                                 placeholder="Enter your password"
                                     type={isPasswordShow ? 'text' : 'password'} 
                                     className="w-full h-[50px] border-2 border-[rgba(0,0,0,0.1)] rounded-md focus:border-[rgba(0,0,0,0.7)] focus:outline-none px-3"
@@ -129,16 +214,20 @@ const Login=()=> {
                                         control={<Checkbox defaultChecked />}
                                         label="Remember Me"
                                     />
-                                    <Link
-                                        to="/forgot-password"
-                                        className="text-[#3872fa]  font-[700] text-[15px] hover:underline hover:text-gray-700"
-                                    >
-                                        Forgot Password?
-                                    </Link>
+                                    
+                                    <a className=" text-[#3872fa]  cursor-pointer text-[15px] font-[700] hover:underline hover:text-gray-700"  onClick={(e) => { e.preventDefault(); forgotPassword(); }} >Forgot Password?</a>
 
                                 </div>
                                  {/* sign in button added */}
-                                    <Button className='btn-blue btn-lg w-full'>Sign In</Button>
+                                    <Button type='submit' disabled={!validValue } className='btn-blue btn-lg w-full'>
+                                        {
+                                            isLoading===true ?
+                                                //  circular move progress
+                                                <CircularProgress color="inherit" />
+                                                :
+                                                'Sign In'
+                                        } 
+                                    </Button>
 
                         </form>
                     </div>
