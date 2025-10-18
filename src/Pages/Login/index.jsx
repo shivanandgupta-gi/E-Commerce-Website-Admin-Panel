@@ -104,7 +104,7 @@ const Login=()=> {
     } 
   return (
     <section className="!bg-white w-full   top-0 left-0">
-        <header className="w-full fixed  top-0 left-0 px-4 py-3 flex items-center justify-between z-50">
+        <header className="w-full static lg:fixed  top-0 left-0 px-4 py-3 flex items-center justify-center sm:justify-between z-50">
             {/* logo */}
             <Link to="/">
             <img
@@ -113,7 +113,7 @@ const Login=()=> {
             />
             </Link>
             {/* login and sign up button */}
-            <div className="flex items-center gap-0">
+            <div className="hidden sm:flex items-center gap-0 ">
                 <NavLink to="/login" exact={true} activeClassName="isActive">
                     <Button className="!rounded-full !text-[rgba(0,0,0,0.8)] !px-5 flex gap-1">
                     <MdLogin className="text-[18px]" /> Login
@@ -126,21 +126,18 @@ const Login=()=> {
                 </NavLink>  
                 </div>
         </header>
-                {/* for background image */}
-                <img src="patern.webp" className="w-full fixed top-0 left-0 opacity-5" />
 
                 {/* icon and login page */}
-                    <div className="loginBox card w-[600px] pb-52 h-auto mx-auto pt-20 relative z-50">
+                    <div className="loginBox card w-full sm:w-[600px] pb-52 h-auto mx-auto pt-0 lg:pt-20 relative z-50">
                         <div className="text-center">
-                            <img  src="/_next/static/media/logo-primary.f9d5d4f7.svg"/>
                         </div>
-                        <h1 className="text-center text-[35px] font-[800] mt-4">
+                        <h1 className="text-center text-[22px] sm:text-[35px] font-[800] mt-4">
                             Welcome Back!<br />
                             <span >Sign in with your credentials.</span>
                         </h1>
 
                         {/* google and facebook button added */}
-                            <div className="flex items-center justify-center w-full mt-5 gap-4">
+                            <div className="flex flex-col  sm:flex-row items-center justify-center w-full mt-5 gap-4">
                                 <LoadingButton
                                     size="small"
                                     onClick={handleClickGoogle}
@@ -148,7 +145,7 @@ const Login=()=> {
                                     loading={loadingGoogle}
                                     loadingPosition="end"
                                     variant="outlined"
-                                    className="!bg-none !py-2  !text-[15px] !capitalize !px-5 !text-[rgba(0,0,0,0.7)]"
+                                    className="!bg-none !py-2  !text-[10px] sm:!text-[15px] !capitalize !px-5 !text-[rgba(0,0,0,0.7)]"
                                 >
                                     Signin with Google
                                 </LoadingButton>
@@ -159,7 +156,7 @@ const Login=()=> {
                                     loading={loadingFb}
                                     loadingPosition="end"
                                     variant="outlined"
-                                    className="!bg-none !py-2 !text-[15px] !capitalize !px-5 !text-[rgba(0,0,0,0.7)]"
+                                    className="!bg-none !py-2  !text-[10px] sm:!text-[15px] !capitalize !px-5 !text-[rgba(0,0,0,0.7)]"
                                 >
                                     Signin with Facebook
                                 </LoadingButton>
@@ -169,7 +166,7 @@ const Login=()=> {
                         {/* option added like login email */}
                         <div className="flex items-center justify-center gap-2 w-full mt-5">
                             <span className="flex items-center w-[100px] h-[1px] bg-[rgba(0,0,0,0.2)]" />
-                            <span className="text-[14px] font-[500]">Or, Sign in with your email</span>
+                            <span className="text-[10px] lg:text-[14px] font-[500]">Or, Sign in with your email</span>
                             <span className="flex items-center w-[100px] h-[1px] bg-[rgba(0,0,0,0.2)]" />
                         </div>
                             <br/>
@@ -216,8 +213,14 @@ const Login=()=> {
                                     />
                                     
                                     <a className=" text-[#3872fa]  cursor-pointer text-[15px] font-[700] hover:underline hover:text-gray-700"  onClick={(e) => { e.preventDefault(); forgotPassword(); }} >Forgot Password?</a>
-
                                 </div>
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-[14px]">Don't have an account?</span>
+                                    <Link to="/signup"
+                                        className="text-primary font-[700] text-[15px] hover:underline hover:text-gray-700 cursor-pointer">
+                                        Sign Up
+                                    </Link>
+                                    </div>
                                  {/* sign in button added */}
                                     <Button type='submit' disabled={!validValue } className='btn-blue btn-lg w-full'>
                                         {

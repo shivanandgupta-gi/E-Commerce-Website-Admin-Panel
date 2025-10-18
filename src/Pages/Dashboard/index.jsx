@@ -25,7 +25,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid,Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid,Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { MyContext } from '../../App';
 import { getData } from '../../../utils/api';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -267,20 +267,114 @@ const [chart1Data, setChart1Data] = useState(
         }
       })
     }
+
+    //for the recent oreder
+      const [order, setOrder] = useState([]);
+      const [searchQuery,setSearchQuery]=useState("");  //for searching
+      const [totalOrdersData,setTotalOrdersData]=useState();
+      const [pageOrder,setPageOrder]=useState(1);
+        useEffect(() => {
+            getData("/api/order/get").then((res) => {
+                if (res.error == false) {
+                    setOrder(res?.order);
+                }
+            })
+            getData("/api/order/orderCount").then((res) => {
+                if (res.error == false) {
+                    setTotalOrdersData(res?.order);
+                }
+            })
+        }, []);
+    //for the searching order
+    useEffect(()=>{
+
+    })
+    //for sending data
+    const [users,setUsers]=useState([]);
+     const [allReviews,setAllReviews]=useState([]);
+    useEffect(()=>{
+      //getTotalSalesByYear();
+      getData("/api/user/get-all-users").then((res)=>{
+        if(res.error === false){
+          setUsers(res.data)
+        }
+      })
+      getData("/api/user/get-all-rev").then((res)=>{
+        if(res.error === false){
+          setAllReviews(res.data)
+        }
+      })
+    },[])
+
+    //for chart making dynamic
+    const[chartData,setChartData]=useState([]);
+    const[year,setYear]=useState(new Date().getFullYear());
+
+    const getTotalUserByYear=()=>{
+      getData(`/api/order/users`).then((res)=>{
+        const users=[];
+        res?.TotalUsers.length !== 0 &&
+        res.TotalUsers.map((item)=>(
+          users.push({
+            name:item.name,
+            TotalUsers:parseInt(item.TotalUsers)
+          })
+        ))
+      });
+
+      const uniqueArr=users.filter(
+        (obj,index,self)=>{
+          index=== self.findIndex((t)=>t.name === obj.name)
+        }
+      )
+    }
+
+    async function getTotalSalesByYear() {
+      const res = await fetchDataFromApi('/api/order/sales');
+      const sales = [];
+      if (res.monthlySales.length !== 0) {
+        res.monthlySales.map(item => {
+          sales.push({
+            name: item.name,
+            TotalSales: parseInt(item.TotalSales)
+          });
+        });
+      }
+
+      const uniqueArr = sales.filter((value, index, self) =>
+        index === self.findIndex(v => v.name === value.name)
+      );
+      setChartData(uniqueArr);
+  }
+  
+   const handleChangeYear=(e)=>{
+    getTotalSalesByYear(e.target,value)
+    setYear(e.target.value)
+   }
   return (
     <>
       <div className="w-full p-5 py-2 px-5 bg-[#f1faff]  border border-[rgba(0,0,0,0.1)] flex items-center gap-8 mb-5 justify-between rounded-md">
         <div className="info">
-          <h1 className="text-[35px] font-bold leading-10 mb-3">Good Morning,<br/> Shivanand </h1>
+          <h1 className="text-[35px] font-bold leading-10 mb-3">Good Morning,<br/> {context?.userData?.name} </h1>
           <p>Here's what happening on your store today. See the statistics at once.</p>
           <br/>
           <Button className="btn-blue !capitalize" onClick={()=>{context.setisOpenFullScreenPanel({open:"true",model:"Add Product"})}}><IoMdAdd/> Add Product</Button>
         </div>
       <img src="https://ecommerce-admin-view.netlify.app/shop-illustration.webp" className="w-[250px]"/>
       </div>
-    <DashboardBoxes/>
-
-    {/* table added for recent product */}
+    {
+        (productData?.length > 0 &&
+        users?.length > 0 &&
+        allReviews?.length > 0) && (
+          <DashboardBoxes
+            orders={totalOrdersData}
+            products={productData?.length}
+            users={users?.length}
+            reviews={allReviews?.length}
+            category={context?.catData?.length}
+          />
+        )
+    }
 
      {/* recent product <section> with material ui </section> */}
       <div className='card my-4 shadow-md sm:rounded-lg bg-white'>
@@ -536,25 +630,173 @@ const [chart1Data, setChart1Data] = useState(
         />
       </div>
 
+      {/* for the recent order added */}
+       <div className='card my-4 shadow-md sm:rounded-lg bg-white mt-10'>
+        <div className="flex items-center w-full pl-5 justify-between gap-5">
+          <div className="col w-[25%] mb-2 mt-4">
+            <h4 className="font-[600] text-[25px] mb-2">Recent Orders</h4>
+            </div>
+          {/* thsi is for the search bar */}
+          <div className='col w-[30%] ml-auto'>
+            <SearchBox 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            setPageOrder={setPageOrder}
+            />
+          </div>
+        </div>
+              <div className="relative overflow-x-auto shadow-md w-full   rounded-md mt-5">
+                    <table className="w-full text-sm text-left text-gray-700 bg-white">
+                        <thead className="text-xs uppercase bg-gray-100 text-gray-700">
+                            <tr>
+                                <th className="px-6 py-3">
+                                    &nbsp;
+                                </th>
+                                <th scope="col" className="px-6 py-3 whitespace-nowrap">Order Id</th>
+                                <th scope="col" className="px-6 py-3 whitespace-nowrap">Payment Id</th>
+                                <th scope="col" className="px-6 py-3 whitespace-nowrap">Name</th>
+                                <th scope="col" className="px-6 py-3 whitespace-nowrap">Phone Number</th>
+                                <th scope="col" className="px-6 py-3 whitespace-nowrap">Address</th>
+                                <th scope="col" className="px-6 py-3 whitespace-nowrap">PinCode</th>
+                                <th scope="col" className="px-6 py-3 whitespace-nowrap">Total Amount</th>
+                                <th scope="col" className="px-6 py-3 whitespace-nowrap">Email</th>
+                                <th scope="col" className="px-6 py-3 whitespace-nowrap">User Id</th>
+                                <th scope="col" className="px-6 py-3 whitespace-nowrap">Order Status</th>
+                                <th scope="col" className="px-6 py-3 whitespace-nowrap">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {
+                                //order dynamic
+                                order?.length !== 0 && order?.map((item, index) => (
+                                    <>
+                                        <tr className="border-b dark:border-gray-700   bg-white">
+
+                                            <td className="px-6 py-4 font-[500]"><Button className="!w-[35px] !h-[35px] !min-w-[35px] !rounded-full !bg-[#f1f1f1] " onClick={() => { isShowOrderProduct(index) }}>
+                                                {
+                                                    isOpenOrderProduct === index ?
+                                                        <FaAngleUp className="text-[16px] text-[rgba(0,0,0,0.7)]" />
+                                                        :
+                                                        <FaAngleDown className="text-[16px] text-[rgba(0,0,0,0.7)]" />
+                                                }
+                                            </Button></td>
+                                            <td className="px-6 py-4 font-[500]">
+                                                <span className="text-[#3872fa] font-[600] block w-[270px]">{item.orderId}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 font-[500]">
+                                                <span className='text-[#3872fa] font-[600]'>{item.paymentId ? item.paymentId : 'CASH ON DELIVERY'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 font-[500] whitespace-nowrap">{item?.userId.name}</td>
+                                            <td className="px-6 py-4 font-[500]">{item?.delivery_address.mobile}</td>
+                                            <td className="px-6 py-4 font-[500]">
+                                                <span className="block w-[400px]">
+                                                    {[
+                                                        item?.delivery_address?.address_line1,
+                                                        item?.delivery_address?.city,
+                                                        item?.delivery_address?.landmark,
+                                                        item.delivery_address.state,
+                                                        item.delivery_address.country,
+                                                        item.delivery_address.mobile
+                                                    ].filter(Boolean).join(", ")}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 font-[500]">{item?.delivery_address?.pincode}</td>
+                                            <td className="px-6 py-4  font-bold">&#8377;{item?.totalAmt}</td>
+                                            <td className="px-6 py-4 font-[500]">{item.userId.email}</td>
+                                            <td className="px-6 py-4 font-[500]">
+                                                <span className='text-[#3872fa] font-[600]'>{item.userId._id}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 font-[500] "><Badge status={item?.order_status}/></td>
+                                            <td className="px-6 py-4 font-[500] whitespace-nowrap">{new Date(item.createdAt).toLocaleDateString('en-US', {
+                                                day: 'numeric',
+                                                month: 'short',
+                                                year: 'numeric'
+                                                })}</td>
+                                        </tr>
+                                        {
+                                            isOpenOrderProduct === index &&
+                                            <tr>
+                                                <td colSpan="6" className="px-6 ">
+                                                    <div className="relative overflow-x-auto shadow-md w-full py-5 px-8 rounded-md ">
+                                                        <table className="w-full text-sm text-left text-gray-700 bg-white">
+                                                            <thead className="text-xs uppercase bg-gray-100 text-gray-700">
+                                                                <tr>
+
+                                                                    <th scope="col" className="px-6 py-3 whitespace-nowrap">Product Id</th>
+                                                                    <th scope="col" className="px-6 py-3 whitespace-nowrap">Product Title</th>
+                                                                    <th scope="col" className="px-6 py-3 whitespace-nowrap">Image</th>
+                                                                    <th scope="col" className="px-6 py-3 whitespace-nowrap">Quantity</th>
+                                                                    <th scope="col" className="px-6 py-3 whitespace-nowrap">Price</th>
+                                                                    <th scope="col" className="px-6 py-3 whitespace-nowrap">Sub Total</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                 {
+                                                                    item?.products?.length !==0 && item.products.map((product,index)=>(
+                                                                        <tr className="border-b dark:border-gray-700   bg-white">
+
+                                                                    <td className="px-6 py-4 font-[500]">
+                                                                        <span className='text-gray-600'> {product?._id}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-6 py-4 font-[500]">
+                                                                        <span className='text-gray-600'><div className='w-[200px]'>{product.productTitle}</div>
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-6 py-4 font-[500]">
+                                                                        <img src={product.image} 
+                                                                            className='w-[40px] h-[40px] object-cover rounded-md' />
+                                                                    </td>
+                                                                    <td className="px-6 py-4 font-[500] whitespace-nowrap">{product.quantity}</td>
+                                                                    <td className="px-6 py-4 font-bold">&#8377;{product.price}</td>
+                                                                    <td className="px-6 py-4 font-bold">
+                                                                        &#8377;{product.quantity*product.price}
+                                                                    </td>
+                                                                </tr>
+                                                                    ))
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </>
+                                ))
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div className='flex items-center justify-center mt-10 pb-5'>
+                  <Pagination 
+                  showFirstButton showLastButton
+                  count={order.length}
+                  />
+                </div>
+      </div>
+
 {/* thsi is for the chart  */}
       <div className='card my-4 shadow-md sm:rounded-lg bg-white'>
        <div className='flex items-center justify-between px-5 py-4'>
         <h2 className='text-[19px] font-[600] mt-2'>Total Users & Total Sales</h2>
       </div>
         <div className="flex items-center gap-5 px-5 py-5 pt-1">
-            <span className="flex items-center gap-1 text-[15px]">
+            <span className="flex items-center gap-1 text-[15px] cursor-pointer">
                 <span className="block w-[8px] h-[8px] rounded-full bg-green-600"></span>
                 Total Users
             </span>
-            <span className="flex items-center gap-1 text-[15px]">
+            <span className="flex items-center gap-1 text-[15px] cursor-pointer">
                 <span className="block w-[8px] h-[8px] rounded-full bg-[#3872fa]"></span>
                 Total Sales
             </span>
             </div>
-        <LineChart
+        <BarChart
         width={1000}
         height={500}
-        data={chart1Data}
+        data={chartData}
         margin={{
           top: 5,
           right: 30,
@@ -563,13 +805,34 @@ const [chart1Data, setChart1Data] = useState(
         }}
       >
         <CartesianGrid strokeDasharray="3 3" stroke='none' />
-        <XAxis dataKey="name"  tick={{fontSize:12}}/>
-        <YAxis tick={{fontSize:12}} />
-        <Tooltip />
+        <XAxis
+          dataKey="name"
+          scale="point"
+          padding={{ left: 10, right: 10 }}
+          tick={{ fontSize: 12 }}
+          label={{ position: "insideBottom", fontSize: 14 }}
+          style={{ fill: context?.theme === "dark" ? "white" : "#000" }}
+        />
+        <YAxis
+          tick={{ fontSize: 12 }}
+          label={{ position: "insideBottom", fontSize: 14 }}
+          style={{ fill: context?.theme === "dark" ? "white" : "#000" }}
+        />
+         <Tooltip
+          contentStyle={{ backgroundColor: "#071739", color: "white" }}
+          labelStyle={{ color: "yellow" }}
+          itemStyle={{ color: "cyan" }}
+          cursor={{ fill: "white" }}
+        />
         <Legend />
-        <Line type="monotone" dataKey="TotalSales" stroke="#8884d8" strokeWidth={3} activeDot={{ r: 8 }} />
-        <Line type="monotone" dataKey="TotalUsers" stroke="#82ca9d" strokeWidth={3}  />
-      </LineChart>
+        <CartesianGrid 
+        strokeDasharray="3 3"
+        horizontal={false}
+        vertical={false}
+        />
+         <Bar dataKey="TotalSales" stackId="a" fill="#163a4d" onClick={getTotalSalesByYear}/>
+          <Bar dataKey="TotalUsers" stackId="b" fill="#08587f" onClick={getTotalUserByYear}/>
+      </BarChart>
       </div>
     </>
   )

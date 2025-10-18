@@ -11,7 +11,9 @@ import { RiProductHuntLine } from "react-icons/ri";
 import { MyContext } from '../../App';
 //thsi page is for the dashboard graph making page small boxes like slae, profit, etc 
 
-const DashboardBoxes=()=> {
+const DashboardBoxes=(props)=> {
+  //backend
+
   return (
     <>
      <Swiper
@@ -22,43 +24,43 @@ const DashboardBoxes=()=> {
         className="dashboardBoxesSlider"
       >
         <SwiperSlide>
-            <div className="box p-5 cursor-pointer hover:bg-[#f1f1f1] rounded-md border border-[rgba(0,0,0,0.1)] flex items-center gap-4 bg-white">
-                <CiGift className="text-[40px] text-[#3872fa]" />
+            <div className="box p-5 cursor-pointer bg-[#cca3e8] hover:bg-[#ad5fe1] rounded-md border border-[rgba(0,0,0,0.1)] flex items-center gap-4 ">
+                <CiGift className="text-[40px] text-[#fff]" />
                 <div className="info w-[70%]">
-                <h3>New Orders</h3>
-                <b>1,390</b>
+                <h3 className='text-[#fff]'>Total Users</h3>
+                <b className='text-[#fff]'> {props.users}</b>
                 </div>
-                <IoStatsChart className="text-[50px] text-[#3872fa]" />
+                <IoStatsChart className="text-[50px] text-[#fff]" />
+            </div>
+            </SwiperSlide>
+        <SwiperSlide>
+            <div className="box p-5 cursor-pointer bg-[#3872fa] hover:bg-[#0c46cd] rounded-md border border-[rgba(0,0,0,0.1)] flex items-center gap-4 ">
+                <CiGift className="text-[40px] text-[#fff]" />
+                <div className="info w-[70%]">
+                <h3 className='text-[#fff]'>Total Orders</h3>
+                <b className='text-[#fff]'>{props.orders}</b>
+                </div>
+                <IoStatsChart className="text-[50px] text-[#fff]" />
             </div>
             </SwiperSlide>
              <SwiperSlide>
-            <div className="box p-5 cursor-pointer hover:bg-[#f1f1f1] rounded-md border border-[rgba(0,0,0,0.1)] flex items-center gap-4 bg-white">
-                <AiOutlinePieChart className="text-[40px] text-[#10b981]" />
+            <div className="box p-5 cursor-pointer bg-[#10b981] hover:bg-[#087b55] rounded-md border border-[rgba(0,0,0,0.1)] flex items-center gap-4 ">
+                <AiOutlinePieChart className="text-[40px] text-[#fff]" />
                 <div className="info w-[70%]">
-                <h3>Sales</h3>
-                <b>₹ 10,56,623</b>
+                <h3 className='text-[#fff]'>Total Products</h3>
+                <b className='text-[#fff]'>{props?.products}</b>
                 </div>
-                <IoStatsChart className="text-[50px] text-[#10b981]" />
+                <IoStatsChart className="text-[50px] text-[#fff]" />
             </div>
             </SwiperSlide>
              <SwiperSlide>
-            <div className="box p-5 cursor-pointer hover:bg-[#f1f1f1] rounded-md border border-[rgba(0,0,0,0.1)] flex items-center gap-4 bg-white">
-                <CiBank className="text-[40px] text-[#7928ca]" />
+            <div className="box p-5 bg-[#7928ca] cursor-pointer hover:bg-[#580ba6]  rounded-md border border-[rgba(0,0,0,0.1)] flex items-center gap-4 ">
+                <CiBank className="text-[40px] text-[#fff]" />
                 <div className="info w-[70%]">
-                <h3>Revenue</h3>
-                <b>₹ 10,56,623</b>
+                <h3 className='text-[#fff]'>Revenue</h3>
+                <b className='text-[#fff]'>₹ 10,56,623</b>
                 </div>
-                <IoStatsChart className="text-[50px] text-[#7928ca]" />
-            </div>
-            </SwiperSlide>
-             <SwiperSlide>
-            <div className="box p-5 cursor-pointer hover:bg-[#f1f1f1] rounded-md border border-[rgba(0,0,0,0.1)] flex items-center gap-4 bg-white">
-                <RiProductHuntLine className="text-[40px] text-[#312be1d8]" />
-                <div className="info w-[70%]">
-                <h3>Total Products</h3>
-                <b>1,390</b>
-                </div>
-                <IoStatsChart className="text-[50px] text-[#312be1d8]" />
+                <IoStatsChart className="text-[50px] text-[#fff]" />
             </div>
             </SwiperSlide>
             

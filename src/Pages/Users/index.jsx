@@ -1,6 +1,5 @@
 import Button from '@mui/material/Button';
 import React, { useContext, useState } from 'react'
-import { IoMdAdd } from "react-icons/io";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -8,49 +7,28 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import Select from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import MenuItem from '@mui/material/MenuItem';
-import { FiEdit3 } from "react-icons/fi";
-import { FaRegEye } from "react-icons/fa";
-import { MdDeleteOutline } from "react-icons/md";
-import { FaCloudUploadAlt } from "react-icons/fa";
 import SearchBox from '../../Componenets/SearchBox';
 import { MyContext } from '../../App';
 import { MdEmail } from "react-icons/md";
 import { FiPhoneCall } from "react-icons/fi";
-import { MdOutlineCalendarToday } from "react-icons/md";
 import { MdOutlineCalendarMonth } from "react-icons/md";
+import { useEffect } from 'react';
+import { deleteData, getData } from '../../../utils/api';
+import EmailVerifyBadge from '../../Componenets/Badge/EmailVerify';
+import CircularProgress from '@mui/material/CircularProgress';
 
 //this page for product list 
 
 //this page for dashborad making
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
-const users = [
-  {
-    id: 1,
-    name: "Shivanand Gupta",
-    image: "https://th.bing.com/th/id/OIP._TDBcYPsjrIY0siNExBBwwHaEo?w=296&h=184&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
-    email: "john@example.com",
-    phone: "+1 555 123 456",
-    created: "2025-08-10",
-  },
-  {
-    id: 2,
-    name: "Ram",
-    image: "https://th.bing.com/th/id/OIP.oi5s1hlNpqBHxLI_iZq3SAHaFj?w=60&h=60&c=1&rs=1&qlt=70&r=0&o=7&dpr=1.3&pid=InlineBlock&rm=3",
-    email: "jane@example.com",
-    phone: "+1 555 987 654",
-    created: "2025-08-09",
-  },
-];
-
 //material ui colums
 const columns = [
-  { id: 'user', label: 'USER', minWidth: 150 },
+  { id: 'user', label: 'USER IMAGE', minWidth: 100 },
+   { id: 'user', label: 'USER NAME', minWidth: 100 },
+   { id: 'user', label: 'EMAIL', minWidth: 150 },
+   { id: 'emailVerify', label: 'EMAIL VERIFY', minWidth: 50 },
   { id: 'userPhonenumber', label: 'USER PHONE NO', minWidth: 100 },
-  
   {
     id: 'created',
     label: 'CREATED',
@@ -62,12 +40,15 @@ const columns = [
     minWidth: 100,
   },
 ];
-
+ 
 const Users=()=> {
        //for filter in table
          const [categoryFilterValue, setcategoryFilterValue] =useState('');
-         const [rowsPerPage, setRowsPerPage] = React.useState(10);
-      
+         const [rowsPerPage, setRowsPerPage] = React.useState(50);
+         const [userData, setUserData]=useState([]);
+         const [userTotalData, setUserTotalData]=useState([]);
+         const [isLoading,setIsLoading]=useState(false);
+         const [searchQuery,setSearchQuery]=useState("");
         const handleChangeCatFilter = (event) => {
           setcategoryFilterValue(event.target.value);
         };
@@ -77,33 +58,75 @@ const Users=()=> {
   };
 
    //   material ui table data
-       const [page, setPage] = React.useState(0);
+       const [page, setPage] =useState(0);
   
     const handleChangePage = (event, newPage) => {
       setPage(newPage);
     };
     //for prduct uploading
     const context=useContext(MyContext);
+
+    //backend start here
+    useEffect(()=>{
+      getusers();
+    },[])
+    const getusers=()=>{
+      setIsLoading(true);
+      getData(`/api/user/get-all-users`).then((res)=>{
+        if(res?.error === false){
+          setTimeout(() => {
+             setUserData(res?.data);
+            setUserTotalData(res?.data)
+            setIsLoading(false);
+          }, 400);
+        }
+      })
+    }
+    //for searching
+    useEffect(()=>{
+      // Filter orders based on search query
+      if (searchQuery !== "") {
+          const filteredOrders = userTotalData?.filter((user) =>
+              user._id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              user?.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              user?.mobile?.includes(searchQuery)
+          );
+          setUserData(filteredOrders);
+      } else {
+          getData(`/api/user/get-all-users`).then((res) => {
+              if (res?.error === false) {
+                  setUserData(res?.data);
+                  setIsLoading(false)
+              }
+          });
+      }
+    },[searchQuery])
+    //delte user data
+    const deleteUser = (id) => { //delete the cart item function
+            deleteData(`/api/user/delete/${id}`).then((res) => { //delete the item from cart
+              if(res.error === false){
+                context.openAlertBox("success","User Delte Successfully");
+                 getusers();
+              }
+            });
+        }
   return (
     <>
-      
-      
         {/* recent product <section> with material ui </section> */}
     <div className='card my-4 shadow-md sm:rounded-lg bg-white'>
-      
-      {/* filter added category */}
-
         <div className="flex items-center w-full pl-6 justify-between ">
             <div className="col w-[40%] mb-4 mt-5">
                  <h2 className='text-[19px] font-[600] '>Users List</h2>
                 </div>
                  {/* thsi is for the search bar */}
              <div className='col w-[40%] ml-auto mt-2'>
-                <SearchBox/>
+                <SearchBox
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                />
             </div>
-                
             </div>
-            
             <br/>
            
             {/* table added */}
@@ -121,86 +144,92 @@ const Users=()=> {
                   align={column.align}
                   style={{ minWidth: column.minWidth }}
                 >
-                  {column.label}
+                  <span className='whitespace-nowrap'>{column.label}</span>
                 </TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-  {users
-    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-    .map((user, index) => (
-      <TableRow hover key={user.id || index}>
-        
-        {/* Checkbox */}
-        <TableCell>
-          <Checkbox {...label} size="small" />
-        </TableCell>
+            {
+              userData.length!==0 && isLoading===false &&userData.slice(
+                page*rowsPerPage, page*rowsPerPage+rowsPerPage
+              )?.reverse()?.map((user,index)=>(
+                <TableRow >
+            {/* Checkbox */}
+            <TableCell>
+              <Checkbox {...label} size="small" />
+            </TableCell>
 
-        {/* USER column */}
-        <TableCell>
-          <div className="flex items-center gap-3">
-            {/* Avatar */}
-            <div className="w-[40px] h-[40px] rounded-md overflow-hidden flex items-center justify-center bg-gray-200 text-lg font-bold text-white">
-              {user.image ? (
-                <img
-                  src={user.image}
-                  alt={user.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                user.name?.charAt(0)
-              )}
-            </div>
-
-            {/* Name + Email */}
-            <div>
-              <h3 className="font-[500] text-[14px]">{user.name}</h3>
-              <p className="flex items-center gap-1 text-gray-600 text-[12px]">
-                <MdEmail className="text-gray-500" size={14} />
-                *********
+            {/* USER column */}
+            <TableCell>
+              <div className="flex items-center gap-3">
+                {/* Avatar */}
+                <div className="img w-[45px] h-[45px] rounded-md overflow-hidden group">
+                  <img
+                    src={user.avatar ? user.avatar : "https://th.bing.com/th/id/OIP.ixZ69lPCOZ3ZO5UqSHQGIAHaHa?w=190&h=190&c=7&r=0&o=7&cb=12&dpr=1.3&pid=1.7&rm=3"}
+                    alt={user.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" />
+                </div>
+              </div>
+            </TableCell>
+            {/* name */}
+             <TableCell>
+              <span className='flex items-center gap-2'>
+                    {user.name}
+              </span>
+            </TableCell>
+             {/* Email */}
+            <TableCell>
+              <span className='flex items-center gap-2'>
+                  <MdEmail className="text-gray-500" size={14} />
+                    {user.email}
+              </span>
+            </TableCell>
+            <TableCell>
+              {
+                <EmailVerifyBadge status={user.verify_email}/>
+              }
+            </TableCell>
+            {/* USER PHONE NO column */}
+            <TableCell>
+              <p className="flex items-center gap-1 text-gray-600 text-[14px]">
+                 <FiPhoneCall size={14} />
+                {user.mobile ? user.mobile : "NONE"}
               </p>
-            </div>
-          </div>
-        </TableCell>
+            </TableCell>
 
-        {/* USER PHONE NO column */}
-        <TableCell>
-          <p className="flex items-center gap-1 text-gray-600 text-[14px]">
-            <FiPhoneCall size={14} />
-            *********
-          </p>
-        </TableCell>
+            {/* CREATED column */}
+            <TableCell>
+              <span className="flex items-center gap-2">
+                <MdOutlineCalendarMonth />  {new Date(user.createdAt).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "short", // or "long" for full name
+                    year: "numeric",
+                  })}
+              </span>
+            </TableCell>
 
-        {/* CREATED column */}
-        <TableCell>
-          <p className="flex items-center gap-1 text-gray-600 text-[14px]">
-            <MdOutlineCalendarMonth size={14} />
-            {user.created}
-          </p>
-        </TableCell>
-
-        {/* ACTION column */}
-        <TableCell>
-          <Button
-            variant="outlined"
-            color="error"
-            size="small"
-            onClick={() => handleDelete(user.id)}
-          >
-            DELETE
-          </Button>
-        </TableCell>
-      </TableRow>
-    ))}
+            {/* ACTION column */}
+            <TableCell>
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                onClick={() => deleteUser(user._id)}
+              >
+                DELETE
+              </Button>
+            </TableCell>
+          </TableRow>
+                  ))
+                }
 </TableBody>
-
         </Table>
       </TableContainer>
        <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component="div"
-        count={10}
+        count={userData.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}

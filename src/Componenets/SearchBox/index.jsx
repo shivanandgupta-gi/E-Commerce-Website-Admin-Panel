@@ -2,8 +2,23 @@ import Button from '@mui/material/Button';
 import React from 'react'
 import { IoSearch } from "react-icons/io5";
 import './index.css'
+import { useState } from 'react';
+import { useRef } from 'react';
 
 const SearchBox=()=> {
+  //backed here
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInput = useRef();
+
+  const onChangeInput = (e) => {
+      setSearchQuery(e.target.value);
+      props.setSearchQuery(e.target.value);
+      
+      if (searchInput.current.value === "") {
+          console.log('a');
+          props.setPageOrder(1);
+      }
+  };
   return (
     <div className='px-5'>
         <div className='w-full h-auto bg-[#f1f1f1] relative overflow-hidden mr-3'>
@@ -12,6 +27,9 @@ const SearchBox=()=> {
             type='text'
             className='w-full h-[40px] border border-[rgba(0,0,0,0.1)] bg-[#f1f1f1] p-2 pl-8 focus:outline-none focus:border-[rgba(0,0,0,0.5)] rounded-md text-[13px]'
             placeholder='Search here...'
+           ref={searchInput}
+           value={searchQuery}
+           onChange={onChangeInput}
             />
         </div>
         </div>
