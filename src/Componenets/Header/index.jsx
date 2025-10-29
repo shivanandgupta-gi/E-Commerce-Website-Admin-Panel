@@ -37,6 +37,7 @@ import AddBannerV1 from "../../Pages/Banner/AddBannerV1";
 import EditBannerV1 from "../../Pages/Banner/EditBannerV1";
 import AddBlog from "../../Pages/Blog/AddBlog";
 import EditBlog from "../../Pages/Blog/EditBlog";
+import AddAdsBanner from "../../Pages/AdsBanner/AddAdsBanner";
 
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -89,7 +90,7 @@ const Header = () => {
                   context.setIsLogin(false);
                   localStorage.removeItem('accesstoken');
                   localStorage.removeItem('refreshtoken');
-                  history("/");
+                  history("/login");
               }  
           })
       }
@@ -291,6 +292,10 @@ const Header = () => {
         {/* for edit the blog */}
         {
           context.isOpenFullScreenPanel?.model === "Edit Blog"&& <EditBlog/>
+        }
+        {/* for the adding ads banner list */}
+         {
+          context.isOpenFullScreenPanel?.model === "Add adsBanner"&& <AddAdsBanner/>
         }
         
       </Dialog>

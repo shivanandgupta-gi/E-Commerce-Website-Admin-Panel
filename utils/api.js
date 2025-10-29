@@ -2,31 +2,62 @@
 import axios from 'axios'
 const apiUrl =import.meta.env.VITE_API_URL;
 
-// Define an async function to send data to a server
+// // Define an async function to send data to a server
+// export const postData = async (url, formData) => {
+//   try {
+//     // Send a POST request using fetch
+//     const response = await fetch(apiUrl + url, {
+//       method: 'POST', // HTTP method
+//       headers: {
+//         'Authorization': `Bearer ${localStorage.getItem("accesstoken")}`, // Get token from browser storage
+//         'Content-Type': 'application/json', // We're sending JSON data
+//       },
+//       body: JSON.stringify(formData) // Convert formData to JSON string
+//     });
+//     //if all correct 
+//     if(response.ok){
+//         const data=await response.json();
+//         return data;
+//     }else{
+//         const errordata=await response.json();
+//         return errordata;
+//     }
+//   } catch (error) {
+//     // If something goes wrong, show the error in the console
+//     console.log(error);
+//   }
+// }
+
 export const postData = async (url, formData) => {
   try {
-    // Send a POST request using fetch
+    // Build headers dynamically
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    const token = localStorage.getItem("accesstoken");
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(apiUrl + url, {
-      method: 'POST', // HTTP method
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem("accesstoken")}`, // Get token from browser storage
-        'Content-Type': 'application/json', // We're sending JSON data
-      },
-      body: JSON.stringify(formData) // Convert formData to JSON string
+      method: 'POST',
+      headers,
+      body: JSON.stringify(formData),
     });
-    //if all correct 
-    if(response.ok){
-        const data=await response.json();
-        return data;
-    }else{
-        const errordata=await response.json();
-        return errordata;
+
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      const errordata = await response.json();
+      return errordata;
     }
   } catch (error) {
-    // If something goes wrong, show the error in the console
     console.log(error);
   }
-}
+};
+
 
 export const postDataAddress = async (url, formData) => {
   try {
@@ -52,7 +83,6 @@ export const postDataAddress = async (url, formData) => {
     console.log(error);
   }
 }
-
 
 //get function to get data from server
 export const getData = async (url) =>{

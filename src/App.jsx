@@ -27,6 +27,7 @@ import AddSize from "./Pages/Products/AddSize";
 import HomeBannerSlider from "./Pages/HomeSliderBannerUpload";
 import BannerV1List from "./Pages/Banner/BannerV1List";
 import BlogList from "./Pages/Blog";
+import AdsBannerList from "./Pages/AdsBanner/AdsBannerList";
 //for product uploading page
 
 const MyContext = createContext();
@@ -312,6 +313,23 @@ function App() {
             </div>
             <div className={`contentRight py-4 px-5  ${isSidebarOpen===true ? "w-[82%]" : "w-[100%]"} transition-all`}>
               <BannerV1List/>
+            </div>
+          </div>
+        </section>
+      ),
+    },
+    //for adding the ads in home page
+     {
+      path: "/adBanner-List",
+      element: (
+        <section className="min">
+          <Header />
+          <div className="contentMain flex">
+            <div className={`sidebarWrapper overflow-hidden ${isSidebarOpen===true ? "w-[18%]" : "w-[0px] opacity-0"} transition-all`}>
+              <Sidebar />
+            </div>
+            <div className={`contentRight py-4 px-5  ${isSidebarOpen===true ? "w-[82%]" : "w-[100%]"} transition-all`}>
+              <AdsBannerList/>
             </div>
           </div>
         </section>

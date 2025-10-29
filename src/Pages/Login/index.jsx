@@ -15,7 +15,13 @@ import { useContext } from 'react';
 import { MyContext } from '../../App';
 import { useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
+import { firebaseApp } from '../../../firebase';
 
+//this for google register
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+//login with google
+const auth = getAuth(firebaseApp); //this is auth that help to register with google
+const googleProvider = new GoogleAuthProvider();
 const Login=()=> {
     const [loadingGoogle, setLoadingGoogle] = useState(false);
     const [loadingFb, setLoadingFb] = useState(false);
@@ -102,6 +108,58 @@ const Login=()=> {
             });
 
     } 
+
+    //login with google
+        //google login
+        const authWithGoogle = () => {
+          signInWithPopup(auth, googleProvider) //this is copy from firebase autherization
+            .then((result) => {
+              // This gives you a Google Access Token. You can use it to access the Google API.
+              const credential = GoogleAuthProvider.credentialFromResult(result);
+              const token = credential.accessToken;
+              // The signed-in user info.
+              const user = result.user;
+              // IdP data available using getAdditionalUserInfo(result)
+              // to store data in formfield 
+              const fields = {
+                name: user.providerData[0].displayName,
+                email: user.providerData[0].email,
+                password: "null",
+                avatar: user.providerData[0].photoURL,
+                mobile: user.providerData[0].phoneNumber,
+                signUpWithGoogle:true,
+                role:"USER"
+              }
+              //api called
+          postData("/api/user/authWithGoogle", fields).then((res) => {
+            console.log(res);
+            if (res?.error !== true) {
+              context.openAlertBox("success", "Login Successfully.")
+              localStorage.setItem("userEmail", fields.email);//for user email store in local storage
+              setIsLoading(false);
+              localStorage.setItem("accesstoken" , res.data?.accesstoken)
+                  localStorage.setItem("refreshtoken", res.data?.refreshToKen)
+      
+                  //this for shown on main page that user login menas user profile shown
+                  context.setIsLogin(true);
+              history("/"); //verify router in index.js//otp page open automatic when otp send
+            }
+            else {
+              context.openAlertBox("error", "email already exists.")
+              setIsLoading(false);
+            }
+          })
+            }).catch((error) => {
+              // Handle Errors here.
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              // The email of the user's account used.
+              const email = error.customData.email;
+              // The AuthCredential type that was used.
+              const credential = GoogleAuthProvider.credentialFromError(error);
+              // ...
+            });
+        }
   return (
     <section className="!bg-white w-full   top-0 left-0">
         <header className="w-full static lg:fixed  top-0 left-0 px-4 py-3 flex items-center justify-center sm:justify-between z-50">
@@ -140,7 +198,7 @@ const Login=()=> {
                             <div className="flex flex-col  sm:flex-row items-center justify-center w-full mt-5 gap-4">
                                 <LoadingButton
                                     size="small"
-                                    onClick={handleClickGoogle}
+                                    onClick={authWithGoogle}
                                     endIcon={<FcGoogle />}
                                     loading={loadingGoogle}
                                     loadingPosition="end"

@@ -17,7 +17,7 @@ import { MyContext } from '../../App';
 import CircularProgress from '@mui/material/CircularProgress';
 
 
-
+ 
 //thsi is register page
 const SignUp=()=> {
     const [loadingGoogle, setLoadingGoogle] = useState(false);
